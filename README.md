@@ -132,7 +132,7 @@ So simple, right?  This allows you to check the approximate power of your batter
 
 ![image](./images/align.jpg)
 
-First you'll need to align the display.  The ESPHome YAML includes some rectangles you can uncomment to get some alignment rectangles.  Line it up as such and then carefully flip it and put some masking tape down to keep it that way.
+First you'll need to align the display.  The ESPHome YAML includes some rectangles you can uncomment to get some alignment rectangles.  Line it up as such and then carefully flip it and put some masking tape down to keep it that way.  Nevermind how the font looks in this picture.  I was testing the OTF version of the fonts... TTF files are better.
 
 
 ## Building
