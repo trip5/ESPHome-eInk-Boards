@@ -163,11 +163,11 @@ Here's where everything finally comes together.  The lace-pattern of the paracor
 
 ## Download Gotham-Rounded Fonts (from this Github)
 
-[Gotham-Rounded-Book](https://powernukkit.github.io/DownGit/index.html#/home?directFile=1&url=https://github.com/trip5/https://github.com/trip5/ESPHome-eInk-Boards/blob/main/fonts/Gotham-Rounded-Book.ttf)
+[Gotham-Rounded-Book](https://powernukkit.github.io/DownGit/index.html#/home?directFile=1&url=https://github.com/trip5/ESPHome-eInk-Boards/blob/main/fonts/Gotham-Rounded-Book.ttf)
 
-[Gotham-Rounded-Bold](https://powernukkit.github.io/DownGit/index.html#/home?directFile=1&url=https://github.com/trip5/https://github.com/trip5/ESPHome-eInk-Boards/blob/main/fonts/Gotham-Rounded-Bold.ttf)
+[Gotham-Rounded-Bold](https://powernukkit.github.io/DownGit/index.html#/home?directFile=1&url=https://github.com/trip5/ESPHome-eInk-Boards/blob/main/fonts/Gotham-Rounded-Bold.ttf)
 
-[Gotham-Rounded-Medium](https://powernukkit.github.io/DownGit/index.html#/home?directFile=1&url=https://github.com/trip5/https://github.com/trip5/ESPHome-eInk-Boards/blob/main/fonts/Gotham-Rounded-Bold.ttf)
+[Gotham-Rounded-Medium](https://powernukkit.github.io/DownGit/index.html#/home?directFile=1&url=https://github.com/trip5/ESPHome-eInk-Boards/blob/main/fonts/Gotham-Rounded-Bold.ttf)
 
 ## Download MaterialDesign-Webfont (from Templarian's Github)
 
