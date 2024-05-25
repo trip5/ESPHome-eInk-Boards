@@ -40,7 +40,7 @@ Certain events like holidays (which are pulled from a calendar), I wish only to 
 
 Please note my preferred `time_pattern` is every 3 minutes.  It takes 2 runs to completely populate all the sensors.  That means 6 minutes total.  Keep that in mind if you decide to increase the value.  Also, although it's not too intensive on the machine, it certainly isn't no work at all, so if your machine is weak (like a Pi), you may wish to increase the time.
 
-Also, keep in mind that Home Assistant reloads Google Tasks and Calendar data every 15 minutes so in theory it could take 29 minutes for items to sync to HA. You can reload them manually with the service `homeassistant.reload_config_entry` if needed.
+Also, keep in mind that Home Assistant reloads Google Tasks and Calendar data every 15 minutes so in theory it could take 29 minutes for items to sync to HA. So if running a waketime at midnight or shortly after, today's TO DO may not be ready yet.  Sidenote that you can reload todo lists and calendars manually with the service `homeassistant.reload_config_entry` if needed.
 
 [`HomeAssistant_template_tasks.yaml`](HomeAssistant_template_tasks.yaml)
 
@@ -183,7 +183,7 @@ Here's where everything finally comes together.  The lace-pattern of the paracor
 
 The Waveshare E-Paper ESP32 Driver Board: https://www.waveshare.com/wiki/E-Paper_ESP32_Driver_Board
 
-An long, ongoing thread regarding support for 3-color displays in ESPHome: https://github.com/esphome/feature-requests/issues/239
+A long, ongoing thread regarding support for 3-color displays in ESPHome: https://github.com/esphome/feature-requests/issues/239
 
 Madelena Mak's Weatherman Dashboard : https://github.com/Madelena/esphome-weatherman-dashboard
 
