@@ -1,0 +1,230 @@
+- trigger:
+    - platform: time_pattern
+      minutes: /1
+      variables:
+        waketime: >
+          {# Edit and order the schedule from midnight 00:00 to 23:59 as needed #}
+          {%- set waketimes = [] %}
+          {%- set waketimes = waketimes + ["00:01"] %}
+          {%- set waketimes = waketimes + ["06:01"] %}
+          {%- set waketimes = waketimes + ["08:01"] %}
+          {%- set waketimes = waketimes + ["10:01"] %}
+          {%- set waketimes = waketimes + ["12:01"] %}
+          {%- set waketimes = waketimes + ["14:01"] %}
+          {%- set waketimes = waketimes + ["16:01"] %}
+          {%- set waketimes = waketimes + ["18:01"] %}
+          {%- set waketimes = waketimes + ["21:01"] %}
+          {%- set waketime = namespace(next = "") %}
+          {%- set waketime_all = [] %}
+          {%- for test in waketimes %}
+            {%- set waketime.next = (now().strftime('%Y-%m-%d')|string) + " " + (test|string) %}
+            {%- if (now().strftime('%Y-%m-%d %H:%M:%S')|string|as_datetime) < (waketime.next|as_datetime) %}
+              {%- break %}
+            {%- endif %}
+          {%- endfor %}
+          {%- if (now().strftime('%Y-%m-%d %H:%M:%S')|string|as_datetime) > (waketime.next|as_datetime) %}
+            {%- set waketime.next = (now().strftime('%Y-%m-%d')|string) + " " + (waketimes[0]|string) %}
+            {%- set waketime_helper = ((as_timestamp(waketime.next|as_datetime + timedelta(days=1)) - as_timestamp(now()|as_datetime))|int(0)) %}
+          {%- else %}
+            {%- set waketime_helper = ((as_timestamp(waketime.next|as_datetime) - as_timestamp(now()|as_datetime))|int(0)) %}
+          {%- endif %}
+          {%- set waketime_all = [waketime.next] + [waketime_helper] + [waketimes] %}
+          {{waketime_all}}
+  sensor:
+    - name: eInk WeatherBoard Wake Times
+      unique_id: eink_weatherboard_wake_times
+      state: "{{ this.attributes.next_wake_time | default('Not Available') }}"
+      attributes:
+        wake_times: "{{ waketime[2] | default('Not Available') }}"
+        next_wake_time: "{{ waketime[0] | default(999999) }}"
+        wake_time_helper: "{{ waketime[1] | default('Not Available') }}"
+
+- trigger:
+    - platform: time_pattern
+      minutes: /3
+  action:
+    - service: todo.get_items
+      data:
+        status: needs_action
+      target:
+        entity_id:
+          - todo.to_do
+          - todo.car
+      response_variable: mylist
+    - service: calendar.get_events
+      data:
+        start_date_time: "{{today_at().strftime('%Y-%m-%d %H:%M')}}"
+        end_date_time: "{{now().date() + timedelta(days=29)}}"
+      target:
+        entity_id:
+         - calendar.family
+         - calendar.holidays_in_south_korea
+         - calendar.bills
+      response_variable: mycalendar
+  sensor:
+    - name: eInk TasksBoard Data
+      unique_id: eink_tasksboard_data
+      state: "OK"
+      attributes:
+        today: >
+          {%- set todo_today_counter = namespace(total = 0) -%}
+          {%- set todo_today = namespace(todo = []) -%}
+          {# -- search todo lists and calendars below this point -- #}
+          {# search calendar #}
+          {%- for events in mycalendar["calendar.family"]["events"] -%}
+            {%- if "start" in events and (now().date()|string) in events.start -%}
+              {%- set todo_item.todo = todo_item.todo + [(events.summary)] -%}
+              {%- set todo_counter.total = todo_counter.total + 1 -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {# search calendar and add a note #}
+          {%- for events in mycalendar["calendar.holidays_in_south_korea"]["events"] -%}
+            {%- if "start" in events and (now().date()|string) in events.start -%}
+              {%- set todo_item.todo = todo_item.todo + ["Korea: " + (events.summary)] -%}
+              {%- set todo_counter.total = todo_counter.total + 1 -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {# search todo list #}
+          {%- for items in mylist["todo.to_do"]["items"] -%}
+            {%- if "due" in items and items.due <= states('sensor.date') -%}
+              {%- set todo_today.todo = todo_today.todo + [(items.summary)] -%}
+              {%- set todo_today_counter.total = todo_today_counter.total + 1 -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {# search todo list and add a note #}
+          {%- for items in mylist["todo.car"]["items"] -%}
+            {%- if "due" in items and items.due <= states('sensor.date') -%}
+              {%- set todo_today.todo = todo_today.todo + ["Spark: " + (items.summary)] -%}
+              {%- set todo_today_counter.total = todo_today_counter.total + 1 -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {# search calendar and add a note #}
+          {%- for events in mycalendar["calendar.bills"]["events"] -%}
+            {%- if "start" in events and (now().date()|string) in events.start -%}
+              {%- set todo_today.todo = todo_today.todo + ["Bills: " + (events.summary)] -%}
+              {%- set todo_today_counter.total = todo_today_counter.total + 1 -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {# -- end searching -- #}
+          {{todo_today.todo}}
+        upcoming: >
+          {%- set latest_date = 29 -%}
+          {%- set todo_counter = namespace(total = 0) -%}
+          {%- set todo_upcoming = namespace(todo = []) -%}
+          {%- for v in range(latest_date) -%}
+            {# -- search todo lists and calendars below this point -- #}
+            {# search calendar #}
+            {%- for events in mycalendar["calendar.family"]["events"] -%}
+              {%- if "start" in events and ((now().date() + timedelta(days=v+1))|string) in events.start -%}
+                {%- set todo_upcoming.todo = todo_upcoming.todo + [(as_datetime(events.start).strftime('%A %B %-d'))] -%}
+                {%- set todo_upcoming.todo = todo_upcoming.todo + [(events.summary)] -%}
+                {%- set todo_counter.total = todo_counter.total + 1 -%}
+              {%- endif -%}
+            {%- endfor -%}
+            {# search todo list #}
+            {%- for items in mylist["todo.to_do"]["items"] -%}
+              {%- if "due" in items and ((now().date() + timedelta(days=v+1))|string) in items.due -%}
+                {%- set todo_upcoming.todo = todo_upcoming.todo + [(as_datetime(items.due).strftime('%A %B %-d'))] -%}
+                {%- set todo_upcoming.todo = todo_upcoming.todo + [(items.summary)] -%}
+                {%- set todo_counter.total = todo_counter.total + 1 -%}
+              {%- endif -%}
+            {%- endfor -%}
+          {# -- end searching -- #}
+          {%- endfor -%}
+          {{todo_upcoming.todo}}
+        today_0: >
+          {{ state_attr('sensor.eink_tasksboard_data','today')[0] | default('') }}
+        today_1: >
+          {{ state_attr('sensor.eink_tasksboard_data','today')[1] | default('') }}
+        today_2: >
+          {{ state_attr('sensor.eink_tasksboard_data','today')[2] | default('') }}
+        today_3: >
+          {{ state_attr('sensor.eink_tasksboard_data','today')[3] | default('') }}
+        today_4: >
+          {{ state_attr('sensor.eink_tasksboard_data','today')[4] | default('') }}
+        today_5: >
+          {{ state_attr('sensor.eink_tasksboard_data','today')[5] | default('') }}
+        today_6: >
+          {{ state_attr('sensor.eink_tasksboard_data','today')[6] | default('') }}
+        today_7: >
+          {{ state_attr('sensor.eink_tasksboard_data','today')[7] | default('') }}
+        today_8: >
+          {{ state_attr('sensor.eink_tasksboard_data','today')[8] | default('') }}
+        today_9: >
+          {{ state_attr('sensor.eink_tasksboard_data','today')[9] | default('') }}
+        upcoming_date_0: >
+          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[0] | default('') }}
+        upcoming_item_0: >
+          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[1] | default('') }}
+        upcoming_date_1: >
+          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[2] | default('') }}
+        upcoming_item_1: >
+          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[3] | default('') }}
+        upcoming_date_2: >
+          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[4] | default('') }}
+        upcoming_item_2: >
+          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[5] | default('') }}
+        upcoming_date_3: >
+          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[6] | default('') }}
+        upcoming_item_3: >
+          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[7] | default('') }}
+        upcoming_date_4: >
+          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[8] | default('') }}
+        upcoming_item_4: >
+          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[9] | default('') }}
+        upcoming_date_5: >
+          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[10] | default('') }}
+        upcoming_item_5: >
+          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[11] | default('') }}
+        upcoming_date_6: >
+          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[12] | default('') }}
+        upcoming_item_6: >
+          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[13] | default('') }}
+        upcoming_date_7: >
+          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[14] | default('') }}
+        upcoming_item_7: >
+          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[15] | default('') }}
+        upcoming_date_8: >
+          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[16] | default('') }}
+        upcoming_item_8: >
+          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[17] | default('') }}
+        upcoming_date_9: >
+          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[18] | default('') }}
+        upcoming_item_9: >
+          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[19] | default('') }}
+  
+- trigger:
+    - platform: time_pattern
+      minutes: /1
+      variables:
+        waketime: >
+          {# Edit and order the schedule from midnight 00:00 to 23:59 as needed #}
+          {%- set waketimes = [] %}
+          {%- set waketimes = waketimes + ["00:01"] %}
+          {%- set waketimes = waketimes + ["06:01"] %}
+          {%- set waketimes = waketimes + ["12:01"] %}
+          {%- set waketimes = waketimes + ["18:01"] %}
+          {%- set waketime = namespace(next = "") %}
+          {%- set waketime_all = [] %}
+          {%- for test in waketimes %}
+            {%- set waketime.next = (now().strftime('%Y-%m-%d')|string) + " " + (test|string) %}
+            {%- if (now().strftime('%Y-%m-%d %H:%M:%S')|string|as_datetime) < (waketime.next|as_datetime) %}
+              {%- break %}
+            {%- endif %}
+          {%- endfor %}
+          {%- if (now().strftime('%Y-%m-%d %H:%M:%S')|string|as_datetime) > (waketime.next|as_datetime) %}
+            {%- set waketime.next = (now().strftime('%Y-%m-%d')|string) + " " + (waketimes[0]|string) %}
+            {%- set waketime_helper = ((as_timestamp(waketime.next|as_datetime + timedelta(days=1)) - as_timestamp(now()|as_datetime))|int(0)) %}
+          {%- else %}
+            {%- set waketime_helper = ((as_timestamp(waketime.next|as_datetime) - as_timestamp(now()|as_datetime))|int(0)) %}
+          {%- endif %}
+          {%- set waketime_all = [waketime.next] + [waketime_helper] + [waketimes] %}
+          {{waketime_all}}
+  sensor:
+    - name: eInk TasksBoard Wake Times
+      unique_id: eink_tasksboard_wake_times
+      state: "{{ this.attributes.next_wake_time | default('Not Available') }}"
+      attributes:
+        wake_times: "{{ waketime[2] | default('Not Available') }}"
+        next_wake_time: "{{ waketime[0] | default(999999) }}"
+        wake_time_helper: "{{ waketime[1] | default('Not Available') }}"

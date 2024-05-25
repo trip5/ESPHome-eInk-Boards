@@ -1,0 +1,654 @@
+# Adapted from https://github.com/Madelena/esphome-weatherman-dashboard
+# And https://blog.wijman.net/e-ink-weather-frame-with-esphome-and-home-assistant/
+# With a lot of my own additions, fixes, edits. My github: https://github.com/trip5
+
+substitutions:
+  name: eink-weatherboard
+  friendly_name: eInk-WeatherBoard
+  project_name: "Trip5.eInk-WeatherBoard"
+  comment: "eInk-WeatherBoard from Trip5"
+  project_version: "2023.05.25"
+  time_zone: "Asia/Seoul" # Check https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  adc_pin: GPIO34
+  sleep_time: 60min # this is the default but is overridden
+
+# Home Assistant entitites:
+  ha_disable_update: input_boolean.eink_weatherboard_disable_update
+  ha_disable_deep_sleep: input_boolean.eink_weatherboard_disable_deep_sleep
+  ha_weather_data: sensor.eink_weatherboard_data
+  ha_wake_times: sensor.eink_weatherboard_wake_times
+
+# Waveshare eInk Board:
+  status_led_pin: GPIO2
+  mosi_pin: GPIO14
+  clk_pin: GPIO13
+  cs_pin: GPIO15
+  dc_pin: GPIO27
+  reset_pin: GPIO26
+  busy_pin: GPIO25
+  busy_inverted: "true" #needed on most newer boards: check ESPHome or component notes
+
+  # Everything here is meant for an 7.5 inch tricolor display, which is not directly supported by ESPHome
+  # See here for full list of directly-supported displays: https://esphome.io/components/display/waveshare_epaper.html
+  # if using only BW, then you may need to edit colors below (change red to same as black)
+  # model: 7.50in-bV2 # Looks good but crazy flashing (use white 100%)
+  # model: 7.50in-bV3 # a bit washed-out (use white 100%)
+  # model: 7.50inV2alt # a bit washed-out (use white 100%)
+
+  # I prefer atomicmike's custom component - be sure it's specified properly below too! (inverted true)
+  model: 7.50inv2b
+  reset_duration: 3ms
+
+  # Also possible is twisterss' custom component - be sure it's specified properly below too! (inverted true)
+  # model: 7.50in-bv2-rb
+  # reset_duration: 2ms
+
+external_components:
+# use atomicmike's repo:
+  - source:
+      type: git
+      url: https://github.com/atomicmike/esphome.git
+      ref: waveshare-color-2023.12
+    components: [ waveshare_epaper ]
+
+# use twisterss' repo:
+#  - source:
+#      type: git
+#      url:  https://github.com/twisterss/esphome-dev.git
+#      ref: waveshare-red-black
+#    components: [ waveshare_epaper ]
+
+esphome:
+  name: $name
+  comment: "$comment"
+  project:
+    name: "$project_name"
+    version: "$project_version"
+  on_boot:
+      priority: 200.0
+      then:
+        #- lambda: 'id(recorded_display_refresh) = 63;' # if you need to manually update the number of refreshes
+        - light.turn_on: led1
+        - script.execute: led_blink
+        - script.execute: get_data_then_refresh_screen
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+ota:
+  password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: true
+  ap:
+    ssid: $name
+    password: !secret ap_password
+
+web_server:
+  port: 80
+  ota: true
+  include_internal: true
+
+captive_portal:
+
+# Enable logging (and stops the LED from spamming the log) - it would also be OK to change the main level to ERROR
+logger:
+  level: DEBUG
+  logs:
+    light: ERROR
+    script: ERROR
+
+# Enable Home Assistant API
+api:
+
+button:
+  - platform: restart
+    name: "$friendly_name Restart"
+    id: "Restart"
+    internal: true
+  - platform: template
+    name: "$friendly_name Refresh Screen"
+    entity_category: config
+    on_press:
+      - lambda: 'id(data_updated) = true;'
+      - script.execute: refresh_screen
+
+output:
+  - platform: ledc
+    id: statusled
+    pin:
+      number: $status_led_pin
+      ignore_strapping_warning: true
+
+light:
+  - platform: monochromatic
+    id: led1
+    name: "LED"
+    output: statusled
+    internal: true
+
+# Define colors - this design is white on black so this is necessary
+color:
+  - id: color_blk
+    red: 100%
+    green: 100%
+    blue: 100%
+    white: 100%
+  - id: color_red
+    red: 100%
+    green: 0%
+    blue: 0%
+    white: 0%
+
+# Pins for Waveshare ePaper ESP Board
+spi:
+  clk_pin: $clk_pin
+  mosi_pin: $mosi_pin
+      
+# Global variables for detecting if the display needs to be refreshed.
+globals:
+  - id: data_updated
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: wake_time_helper_updated
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: recorded_display_refresh
+    type: int
+    restore_value: yes
+    initial_value: '0'
+
+script:
+  - id: get_data_then_refresh_screen
+    mode: restart
+    then:
+      - wait_until:
+          condition:
+            lambda: 'return id(data_updated) == true;'
+      - delay: 10s # Wait a bit longer so all the items are received. Might need to be more.
+      - logger.log: "Sensor data received."
+      - script.execute: refresh_screen
+  - id: refresh_screen
+    mode: restart
+    then:
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(data_updated) == true;'
+              - binary_sensor.is_off: disable_update
+          then:
+            - lambda: 'id(recorded_display_refresh) += 1;'
+            - lambda: 'id(display_last_update).publish_state(id(homeassistant_time).now().timestamp);'
+            - output.turn_on: statusled
+            - logger.log: "Refreshing display..."
+            - component.update: eink_display
+            - lambda: 'id(data_updated) = false;'
+          else:
+            - logger.log: "No new data or Home Assistant Helper 'Disable Update' is on. Skipping display refresh."
+      - script.execute: deep_sleep_evaluation
+  - id: deep_sleep_evaluation
+    # This dynamic deep sleep script inspired by https://webbinaro.dev/blog/battery-powered-esp-sensors-esphome/
+    mode: restart
+    then:
+      - if:
+          condition:
+            binary_sensor.is_on: disable_deep_sleep
+          then:
+            - logger.log: 'Deep Sleep Disabled.'
+            - script.execute: deep_sleep_disabled_check_refresh_time
+          else:
+            - wait_until:
+                condition:
+                  lambda: 'return id(wake_time_helper_updated) == true;'
+            - wait_until:
+                condition:
+                  lambda: 'return (id(wake_time_helper).state >= 120);'
+            - lambda: 'id(wake_time_helper_updated) = false;'
+            - deep_sleep.enter:
+                id: deep_sleep_control
+                sleep_duration: !lambda return id(wake_time_helper).state * 1000;   #lambdas should return value as ms
+      - delay: 60s
+      - script.execute: deep_sleep_evaluation
+  - id: deep_sleep_disabled_check_refresh_time
+    # This will update the screen on the HA helper schedule(ish) even if Deep Sleep is disabled
+    mode: restart
+    then:
+      - if:
+          condition:
+            - lambda: 'return id(wake_time_helper).state <= 60;'
+          then:
+            - logger.log: 'Time to refresh the screen.'
+            - script.execute: get_data_then_refresh_screen
+  - id: led_blink
+    # This will make a breathing effect on the status LED if the power is on
+    mode: restart
+    then:
+      - delay: 1s
+      - light.turn_off: led1
+      - delay: 4s
+      - light.turn_on: led1
+      - script.execute: led_blink
+
+deep_sleep:
+  id: deep_sleep_control
+  sleep_duration: $sleep_time
+
+time:
+  - platform: homeassistant
+    timezone: "$time_zone"
+    id: homeassistant_time
+    # if using USB battery, deep sleep is disabled, and more constant refreshes are OK, then you may need this bit:
+    #on_time:
+    #  - seconds: 0
+    #    minutes: 0,15,30,45
+    #     then:
+    #       - script.execute: get_data_then_refresh_screen
+
+# The following are boolean helpers in Home Assistant
+binary_sensor:
+  - platform: homeassistant
+    id: disable_deep_sleep
+    name: "$friendly_name Disable Deep Sleep"
+    entity_id: '${ha_disable_deep_sleep}'
+  - platform: homeassistant
+    id: disable_update
+    name: "$friendly_name Disable Update"
+    entity_id: '${ha_disable_update}'
+
+# Include custom fonts:
+font:
+  # Gotham Rounded - for headers and text (by Tobias Frere Jones)
+  # Get the Book version here: https://fontsgeek.com/fonts/Gotham-Book
+  # Get the Bold version here: https://fontsgeek.com/fonts/Gotham-Rounded-Bold
+  # Get the Medium version here: https://fontsgeek.com/fonts/Gotham-Rounded-Medium
+  # The glyphs must be present or you'll see boxes/blank spaces (no problem unless you edit the Display section below) - don't forget to include a space!
+  # How to get an easy glyphs list? Copy the code from here: https://www.geeksforgeeks.org/cpp-program-to-remove-duplicates-from-a-given-string/
+  # ...to here: https://www.onlinegdb.com/online_c++_compiler
+  - file: 'fonts/Gotham-Rounded-Bold.ttf'
+    id: font_title
+    size: 52
+    glyphs: WETH RLOADING
+  - file: 'fonts/Gotham-Rounded-Bold.ttf'
+    id: font_now_temp
+    size: 104
+    glyphs: °C 1234567890-
+  - file: 'fonts/Gotham-Rounded-Bold.ttf'
+    id: font_small_title
+    size: 30
+    glyphs:  |
+      TODAY ULK
+  - file: 'fonts/Gotham-Rounded-Medium.ttf'
+    id: font_today_time
+    size: 20
+    glyphs:  |
+      1234567890: AMP
+  - file: 'fonts/Gotham-Rounded-Bold.ttf'
+    id: font_today_temp
+    size: 26
+    glyphs:  |
+      °C 1234567890-
+  - file: 'fonts/Gotham-Rounded-Medium.ttf'
+    id: font_outlook_day
+    size: 24
+    glyphs:  |
+      Sun MoTeWdhFriat
+  - file: 'fonts/Gotham-Rounded-Bold.ttf'
+    id: font_outlook_temp
+    size: 28
+    glyphs:  |
+      °C 1234567890-
+  - file: 'fonts/Gotham-Rounded-Book.ttf'
+    id: font_refresh_stamp
+    size: 20
+    glyphs:  |
+      Refrshd at1234567890:AMPSunoTWFi
+
+  # Include Material Design Icons font (for weather & sync & battery icons) (by Austin Andrews / Templarian)
+  # Get it here: https://github.com/Templarian/MaterialDesign-Webfont/
+
+  # Encoding glyphs from here: https://community.home-assistant.io/t/display-materialdesign-icons-on-esphome-attached-to-screen/199790/16
+  - file: 'fonts/materialdesignicons-webfont.ttf'
+    id: font_mdi_large
+    size: 96
+    glyphs: &mdi-weather-glyphs
+      - "\U000F0590" # mdi-weather-cloudy
+      - "\U000F0F2F" # mdi-weather-cloudy-alert
+      - "\U000F0E6E" # mdi-weather-cloudy-arrow-right
+      - "\U000F0591" # mdi-weather-fog
+      - "\U000F0592" # mdi-weather-hail
+      - "\U000F0F30" # mdi-weather-hazy
+      - "\U000F0898" # mdi-weather-hurricane
+      - "\U000F0593" # mdi-weather-lightning
+      - "\U000F067E" # mdi-weather-lightning-rainy
+      - "\U000F0594" # mdi-weather-night
+      - "\U000F0F31" # mdi-weather-night-partly-cloudy
+      - "\U000F0595" # mdi-weather-partly-cloudy
+      - "\U000F0F32" # mdi-weather-partly-lightning
+      - "\U000F0F33" # mdi-weather-partly-rainy
+      - "\U000F0F34" # mdi-weather-partly-snowy
+      - "\U000F0F35" # mdi-weather-partly-snowy-rainy
+      - "\U000F0596" # mdi-weather-pouring
+      - "\U000F0597" # mdi-weather-rainy
+      - "\U000F0598" # mdi-weather-snowy
+      - "\U000F0F36" # mdi-weather-snowy-heavy
+      - "\U000F067F" # mdi-weather-snowy-rainy
+      - "\U000F0599" # mdi-weather-sunny
+      - "\U000F0F37" # mdi-weather-sunny-alert
+      - "\U000F14E4" # mdi-weather-sunny-off
+      - "\U000F059A" # mdi-weather-sunset
+      - "\U000F059B" # mdi-weather-sunset-down
+      - "\U000F059C" # mdi-weather-sunset-up
+      - "\U000F0F38" # mdi-weather-tornado
+      - "\U000F059D" # mdi-weather-windy
+      - "\U000F059E" # mdi-weather-windy-variant
+      - "\U000F04E6" # mdi-sync 󰓦
+  - file: 'fonts/materialdesignicons-webfont.ttf'
+    id: font_mdi_small
+    size: 64
+    glyphs: *mdi-weather-glyphs
+  - file: 'fonts/materialdesignicons-webfont.ttf'
+    id: font_battery_glyphs
+    size: 22
+    glyphs: &mdi-battery-glyphs
+      - "\U000F10CD" # mdi-battery-warning
+      - "\U000F12A3" # mdi-battery-high
+      - "\U000F12A2" # mdi-battery-med
+      - "\U000F12A1" # mdi-battery-low
+
+sensor:  
+  # Create sensors for monitoring the board remotely.
+  - platform: template
+    name: "$friendly_name Display Last Update"
+    device_class: timestamp
+    entity_category: "diagnostic"
+    id: display_last_update
+  - platform: template
+    name: "$friendly_name Recorded Display Refresh"
+    accuracy_decimals: 0
+    unit_of_measurement: "Refreshes"
+    state_class: "total_increasing"
+    entity_category: "diagnostic"
+    lambda: 'return id(recorded_display_refresh);'
+  - platform: wifi_signal
+    name: "$friendly_name WiFi Signal Strength"
+    id: wifisignal
+    unit_of_measurement: "dBm"
+    entity_category: "diagnostic"
+    update_interval: 60s
+  - platform: adc
+    name: "$friendly_name Battery"
+    id: battery_adc
+    pin: $adc_pin
+    attenuation: 11db
+    update_interval: 60s
+    entity_category: "diagnostic"
+    filters:
+    - multiply: 1.33
+    # this multiply number may need to be manually adjusted with power on while idle
+    # I used a LiPo battery: negative pole -> 33K resistor -> ADC GPIO -> 100K resistor -> GND
+
+  # Call numeric sensors from Home Assistant
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_now_temperature
+    id: weather_now_temperature
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_hourly_temperature_0
+    id: weather_hourly_temperature_0
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_hourly_temperature_1
+    id: weather_hourly_temperature_1
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_hourly_temperature_2
+    id: weather_hourly_temperature_2
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_hourly_temperature_3
+    id: weather_hourly_temperature_3
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_daily_temperature_0
+    id: weather_daily_temperature_0
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_daily_temperature_1
+    id: weather_daily_temperature_1
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_daily_temperature_2
+    id: weather_daily_temperature_2
+  - platform: homeassistant
+    name: "$friendly_name Wake Time Helper"
+    id: wake_time_helper
+    entity_id: '${ha_wake_times}'
+    attribute: wake_time_helper
+    unit_of_measurement: seconds
+    on_value:
+      then:
+         - lambda: 'id(wake_time_helper_updated) = true;'
+
+text_sensor:
+  - platform: version
+    name: "$friendly_name ESPHome Version"
+    hide_timestamp: true
+    entity_category: diagnostic
+  - platform: wifi_info
+    ip_address:
+      id: wifi_ip
+      name: "$friendly_name IP Address"
+      entity_category: diagnostic
+    ssid:
+      id: wifi_ssid
+      name: "$friendly_name SSID"
+      entity_category: diagnostic
+  - platform: template
+    name: "$friendly_name $project_name Version"
+    lambda: |-
+      return {"$project_version"};
+
+  # Call text sensors from Home Assistant
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_now_condition
+    id: weather_now_condition
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_hourly_condition_0
+    id: weather_hourly_condition_0
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_hourly_timestamp_0
+    id: weather_hourly_timestamp_0
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_hourly_condition_1
+    id: weather_hourly_condition_1
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_hourly_timestamp_1
+    id: weather_hourly_timestamp_1
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_hourly_condition_2
+    id: weather_hourly_condition_2
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_hourly_timestamp_2
+    id: weather_hourly_timestamp_2
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_hourly_condition_3
+    id: weather_hourly_condition_3
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_hourly_timestamp_3
+    id: weather_hourly_timestamp_3
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_daily_condition_0
+    id: weather_daily_condition_0
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_daily_timestamp_0
+    id: weather_daily_timestamp_0
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_daily_condition_1
+    id: weather_daily_condition_1
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_daily_timestamp_1
+    id: weather_daily_timestamp_1
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_daily_condition_2
+    id: weather_daily_condition_2
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_daily_timestamp_2
+    id: weather_daily_timestamp_2
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
+
+# Now render everything on the ePaper screen.
+display:
+  - platform: waveshare_epaper
+    id: eink_display
+    cs_pin:
+      number: $cs_pin
+      ignore_strapping_warning: true
+    dc_pin: $dc_pin
+    busy_pin:
+      number: $busy_pin
+      inverted: $busy_inverted
+    reset_pin: $reset_pin
+    reset_duration: $reset_duration
+    model: $model
+    update_interval: never
+    setup_priority: 1000
+    rotation: 90°
+    lambda: |-
+      // Map weather states to MDI characters.
+      std::map<std::string, std::string> weather_icon_map
+        {
+          {"cloudy", "\U000F0590"},
+          {"cloudy-alert", "\U000F0F2F"},
+          {"cloudy-arrow-right", "\U000F0E6E"},
+          {"clear-night", "\U000F0594"},
+          {"fog", "\U000F0591"},
+          {"hail", "\U000F0592"},
+          {"hazy", "\U000F0F30"},
+          {"hurricane", "\U000F0898"},
+          {"lightning", "\U000F0593"},
+          {"lightning-rainy", "\U000F067E"},
+          {"night", "\U000F0594"},
+          {"night-partly-cloudy", "\U000F0F31"},
+          {"partlycloudy", "\U000F0595"},
+          {"partly-lightning", "\U000F0F32"},
+          {"partly-rainy", "\U000F0F33"},
+          {"partly-snowy", "\U000F0F34"},
+          {"partly-snowy-rainy", "\U000F0F35"},
+          {"pouring", "\U000F0596"},
+          {"rainy", "\U000F0597"},
+          {"snowy", "\U000F0598"},
+          {"snowy-heavy", "\U000F0F36"},
+          {"snowy-rainy", "\U000F067F"},
+          {"sunny", "\U000F0599"},
+          {"sunny-alert", "\U000F0F37"},
+          {"sunny-off", "\U000F14E4"},
+          {"sunset", "\U000F059A"},
+          {"sunset-down", "\U000F059B"},
+          {"sunset-up", "\U000F059C"},
+          {"tornado", "\U000F0F38"},
+          {"windy", "\U000F059D"},
+          {"windy-variant", "\U000F059E"},
+          {"sync", "\U000F04E6"}
+        };
+
+      // Left from Madelena's code... perhaps if you want a black or colored background first (useful for fast-refresh screens?)
+      // Fill background.
+      // it.fill(color_bg);
+
+      // Alignment rectangles! (uncomment to use - useful when first mounting the eInk screen)
+      //it.rectangle(0, 0, 480, 800);
+      //it.rectangle(10, 10, 460, 780);
+      //it.rectangle(20, 20, 440, 760);
+      //it.rectangle(30, 30, 420, 740);
+      //it.rectangle(40, 40, 400, 720);
+      //it.rectangle(50, 50, 380, 700);
+      //it.rectangle(60, 60, 360, 680);
+      //it.rectangle(70, 70, 340, 660);
+      //it.rectangle(80, 80, 320, 640);
+
+      // CURRENT WEATHER
+      it.printf(240, 84, id(font_title), color_red, TextAlign::TOP_CENTER, "WEATHER");
+      it.printf(100, 158, id(font_mdi_large), color_blk, TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_now_condition).state.c_str()].c_str());
+      it.printf(300, 158, id(font_now_temp), color_blk, TextAlign::TOP_CENTER, "%2.0f°C", id(weather_now_temperature).state);
+
+      // HOURLY
+      it.printf(240, 280, id(font_small_title), color_red, TextAlign::TOP_CENTER, "TODAY");
+
+      it.printf(90, 325, id(font_today_time), color_blk, TextAlign::TOP_CENTER, "%s", id(weather_hourly_timestamp_0).state.c_str());
+      it.printf(90, 350, id(font_mdi_small), color_blk, TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_hourly_condition_0).state.c_str()].c_str());
+      it.printf(90, 420, id(font_today_temp), color_blk, TextAlign::TOP_CENTER, "%2.0f°C", id(weather_hourly_temperature_0).state);
+
+      it.printf(190, 325, id(font_today_time), color_blk, TextAlign::TOP_CENTER, "%s", id(weather_hourly_timestamp_1).state.c_str());
+      it.printf(190, 350, id(font_mdi_small), color_blk, TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_hourly_condition_1).state.c_str()].c_str());
+      it.printf(190, 420, id(font_today_temp), color_blk, TextAlign::TOP_CENTER, "%2.0f°C", id(weather_hourly_temperature_1).state);
+
+      it.printf(290, 325, id(font_today_time), color_blk, TextAlign::TOP_CENTER, "%s", id(weather_hourly_timestamp_2).state.c_str());
+      it.printf(290, 350, id(font_mdi_small), color_blk, TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_hourly_condition_2).state.c_str()].c_str());
+      it.printf(290, 420, id(font_today_temp), color_blk, TextAlign::TOP_CENTER, "%2.0f°C", id(weather_hourly_temperature_2).state);
+
+      it.printf(390, 325, id(font_today_time), color_blk, TextAlign::TOP_CENTER, "%s", id(weather_hourly_timestamp_3).state.c_str());
+      it.printf(390, 350, id(font_mdi_small), color_blk, TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_hourly_condition_3).state.c_str()].c_str());
+      it.printf(390, 420, id(font_today_temp), color_blk, TextAlign::TOP_CENTER, "%2.0f°C", id(weather_hourly_temperature_3).state);
+
+      // NEXT 3 DAYS
+      it.printf(240, 480, id(font_small_title), color_red, TextAlign::TOP_CENTER, "OUTLOOK");
+
+      it.printf(120, 520, id(font_outlook_day), color_blk, TextAlign::TOP_CENTER, "%s", id(weather_daily_timestamp_0).state.c_str());
+      it.printf(120, 550, id(font_mdi_large), color_blk, TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_daily_condition_0).state.c_str()].c_str());
+      it.printf(120, 650, id(font_outlook_temp), color_blk, TextAlign::TOP_CENTER, "%2.0f°C", id(weather_daily_temperature_0).state);
+
+      it.printf(240, 520, id(font_outlook_day), color_blk, TextAlign::TOP_CENTER, "%s", id(weather_daily_timestamp_1).state.c_str());
+      it.printf(240, 550, id(font_mdi_large), color_blk, TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_daily_condition_1).state.c_str()].c_str());
+      it.printf(240, 650, id(font_outlook_temp), color_blk, TextAlign::TOP_CENTER, "%2.0f°C", id(weather_daily_temperature_1).state);
+
+      it.printf(360, 520, id(font_outlook_day), color_blk, TextAlign::TOP_CENTER, "%s", id(weather_daily_timestamp_2).state.c_str());
+      it.printf(360, 550, id(font_mdi_large), color_blk, TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_daily_condition_2).state.c_str()].c_str());
+      it.printf(360, 650, id(font_outlook_temp), color_blk, TextAlign::TOP_CENTER, "%2.0f°C", id(weather_daily_temperature_2).state);
+
+      // Refresh Timestamp with time and day
+      // from https://community.home-assistant.io/t/esphome-show-time/348903
+      char str[17];
+      time_t currTime = id(homeassistant_time).now().timestamp;
+      strftime(str, sizeof(str), "%l:%M%p %a", localtime(&currTime));
+      it.printf(240, 715, id(font_refresh_stamp), color_blk, TextAlign::TOP_CENTER, "Refreshed at %s", str);
+
+      // Battery Icon by Trip5 (placement at bottom right can be tricky)
+      std::map<std::string, std::string> battery_icon_map
+      {
+        {"batteryhigh", "\U000F12A3"},
+        {"batterymed", "\U000F12A2"},
+        {"batterylow", "\U000F12A1"},
+        {"batterywarn", "\U000F10CD"}
+      };
+      int batt_x = 440; 
+      int batt_y = 712;
+      float batt_v = float(id(battery_adc).state);
+      if (0 <= batt_v && batt_v < 3.3) { it.printf(batt_x, batt_y, id(font_battery_glyphs), color_red, TextAlign::TOP_CENTER, "%s", battery_icon_map["batterywarn"].c_str()); }
+      if (3.3 <= batt_v && batt_v < 3.6) { it.printf(batt_x, batt_y, id(font_battery_glyphs), color_red, TextAlign::TOP_CENTER, "%s", battery_icon_map["batterylow"].c_str()); }
+      if (3.6 <= batt_v && batt_v < 3.8) { it.printf(batt_x, batt_y, id(font_battery_glyphs), color_blk, TextAlign::TOP_CENTER, "%s", battery_icon_map["batterymed"].c_str()); }
+      if (3.8 <= batt_v) { it.printf(batt_x, batt_y, id(font_battery_glyphs), color_blk, TextAlign::TOP_CENTER, "%s", battery_icon_map["batteryhigh"].c_str()); }
+ 
