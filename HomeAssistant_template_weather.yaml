@@ -122,15 +122,15 @@
         waketime: >
           {# Edit and order the schedule from midnight 00:00 to 23:59 as needed #}
           {%- set waketimes = [] %}
-          {%- set waketimes = waketimes + ["00:01"] %}
-          {%- set waketimes = waketimes + ["06:01"] %}
-          {%- set waketimes = waketimes + ["08:01"] %}
-          {%- set waketimes = waketimes + ["10:01"] %}
-          {%- set waketimes = waketimes + ["12:01"] %}
-          {%- set waketimes = waketimes + ["14:01"] %}
-          {%- set waketimes = waketimes + ["16:01"] %}
-          {%- set waketimes = waketimes + ["18:01"] %}
-          {%- set waketimes = waketimes + ["21:01"] %}
+          {%- set waketimes = waketimes + ["00:07"] %}
+          {%- set waketimes = waketimes + ["06:07"] %}
+          {%- set waketimes = waketimes + ["08:07"] %}
+          {%- set waketimes = waketimes + ["10:07"] %}
+          {%- set waketimes = waketimes + ["12:07"] %}
+          {%- set waketimes = waketimes + ["14:07"] %}
+          {%- set waketimes = waketimes + ["16:07"] %}
+          {%- set waketimes = waketimes + ["18:07"] %}
+          {%- set waketimes = waketimes + ["21:07"] %}
           {%- set waketime = namespace(next = "") %}
           {%- set waketime_all = [] %}
           {%- for test in waketimes %}
