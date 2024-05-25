@@ -158,7 +158,9 @@ The power board should fit about here.
 
 ![image](./images/build3.jpg)
 
-Here's where everything finally comes together.  The lace-pattern of the paracord shows a place to put in that big 10000mAh battery as well as the velcro I use to hold the ribbon cable down.  You could use tape here too.  I'm pretty happy with how the battery is held in place but I'm still trying to figure out if this is the best way to hang it to the wall.  There's a clear shot of the "showlace tightener" I use to pull the paracord tight.
+Here's where everything finally comes together.  The lace-pattern of the paracord shows a place to put in that big 10000mAh battery as well as the velcro I use to hold the ribbon cable down.  You could use masking tape to hold down the cable, too.  I'm pretty happy with how the battery is held in place but I'm still trying to figure out if this is the best way to hang it to the wall.  There's a clear shot of the "showlace tightener" I use to pull the paracord tight.
+
+Also you can see a white bit cut out of what used to be the spacer at the front of the frame.  This allows that bit to protect the battery from the screw heads and also the ability to take everything apart without removing the D-rings.
 
 ## Update History
 
