@@ -38,6 +38,10 @@ Unlike the WeatherBoard code, you will need to carefully edit certain sections o
 
 Certain events like holidays (which are pulled from a calendar), I wish only to appear on the top TO DO and never in UPCOMING, while other things will appear in UPCOMING but never in TO DO.  Some things are pulled from certain to do lists and you may wish the board to indicate which list it's from (ie. "Check Oil" on the "Car Tasks" list may appear as "Car: Check Oil" on the board).
 
+Please note my preferred `time_pattern` is every 3 minutes.  It takes 2 runs to completely populate all the sensors.  That means 6 minutes total.  Keep that in mind if you decide to increase the value.  Also, although it's not too intensive on the machine, it certainly isn't no work at all, so if your machine is weak (like a Pi), you may wish to increase the time.
+
+Also, keep in mind that Home Assistant reloads Google Tasks and Calendar data every 15 minutes so in theory it could take 29 minutes for items to sync to HA. You can reload them manually with the service `homeassistant.reload_config_entry` if needed.
+
 [`HomeAssistant_template_tasks.yaml`](HomeAssistant_template_tasks.yaml)
 
 #### Waketimes
@@ -79,7 +83,7 @@ Because the YAML has plenty of notes scattered throughout it, I won't waste spac
 
 A note here that the list is somewhat dynamic.  As more TO DO tasks are displayed, the UPCOMING list is pushed further down and will not attempt to display items that do not fit.  If no TO DO items are available, it will have a default "Nothing today!" message that you may wish to edit.  Again, there are plenty of notes scattered throughout the YAML so check it carefully.
 
-Please note that as you can see in my above example, I have an unknown character appear. I live in Korea and that should be a Korean Won symbol (₩).  It is not displayed correctly because it does not exist in the font.  There's nothing to do about this without changing the font to one which supports this character.  It's ugly but shouldn't happen often.  ESPHome is also limited by Pillow on how many glyphs may be included (undocumented but I believe it's 255) so there's almost no chance of using Asian languages here.
+Please note that you may see a missing glyph (always a black box ■) on your board.  The solution is quite simple.  Add the character to the glyphs lists in the ESPHome YAML.  If you see an unknown character glyph (in the Gotham-Round fonts similar as ☒) instead, it means the font is missing that character. The solution is to either change the font, avoid using the character, or ignore it. For example, I have defined the South Korean Won currency symbol (₩) even though it is not present in the font. I'd rather see the ☒ instead of ■. Please note that I'm pretty sure Pillow (the element of ESPHome uses to encode characters into pictures) limits the number of glyphs. I believe it's 255.
 
 [`ESPHome_eink-tasksboard.yaml`](ESPHome_eink-tasksboard.yaml)
 
@@ -97,6 +101,7 @@ Please note that as you can see in my above example, I have an unknown character
 - 1260110 Rechargeable Lithium Polymer Battery (3.7V 10000mAh): https://www.aliexpress.com/item/1005006162769300.html
 - 3.7V Battery LED Digital Voltmeter (1S 3.7V): https://www.aliexpress.com/item/32848280207.html
 - TP4056 Battery charger (USB C): https://www.aliexpress.com/item/32836046028.html
+- Masking tape
 
 ## Waveshare E-Paper ESP32 Driver Board
 

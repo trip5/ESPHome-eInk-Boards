@@ -347,7 +347,6 @@ font:
       - "\U000F0F38" # mdi-weather-tornado
       - "\U000F059D" # mdi-weather-windy
       - "\U000F059E" # mdi-weather-windy-variant
-      - "\U000F04E6" # mdi-sync 󰓦
   - file: 'fonts/materialdesignicons-webfont.ttf'
     id: font_mdi_small
     size: 64
@@ -572,11 +571,9 @@ display:
           {"tornado", "\U000F0F38"},
           {"windy", "\U000F059D"},
           {"windy-variant", "\U000F059E"},
-          {"sync", "\U000F04E6"}
         };
 
-      // Left from Madelena's code... perhaps if you want a black or colored background first (useful for fast-refresh screens?)
-      // Fill background.
+      // Left from Madelena's code... perhaps if you want a black or colored background first (useful for fast-refresh screens?) to fill the background.
       // it.fill(color_bg);
 
       // Alignment rectangles! (uncomment to use - useful when first mounting the eInk screen)

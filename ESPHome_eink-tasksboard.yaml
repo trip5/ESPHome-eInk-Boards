@@ -303,15 +303,10 @@ font:
     glyphs:  |
       ! "#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz°₩
 
-  # Include Material Design Icons font (for sync & battery icons) (by Austin Andrews / Templarian)
+  # Include Material Design Icons font (for battery icons) (by Austin Andrews / Templarian)
   # Get it here: https://github.com/Templarian/MaterialDesign-Webfont/
 
   # Encoding glyphs from here: https://community.home-assistant.io/t/display-materialdesign-icons-on-esphome-attached-to-screen/199790/16
-  - file: 'fonts/materialdesignicons-webfont.ttf'
-    id: font_mdi_large
-    size: 96
-    glyphs: &mdi-sync-glyph
-      - "\U000F04E6" # mdi-sync 󰓦
   - file: 'fonts/materialdesignicons-webfont.ttf'
     id: font_battery_glyphs
     size: 22
@@ -514,6 +509,78 @@ text_sensor:
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_item_9
     id: upcoming_item_9
+  - platform: homeassistant
+    entity_id: '${ha_tasks_data}'
+    attribute: upcoming_date_10
+    id: upcoming_date_10
+  - platform: homeassistant
+    entity_id: '${ha_tasks_data}'
+    attribute: upcoming_item_10
+    id: upcoming_item_10
+  - platform: homeassistant
+    entity_id: '${ha_tasks_data}'
+    attribute: upcoming_date_11
+    id: upcoming_date_11
+  - platform: homeassistant
+    entity_id: '${ha_tasks_data}'
+    attribute: upcoming_item_11
+    id: upcoming_item_11
+  - platform: homeassistant
+    entity_id: '${ha_tasks_data}'
+    attribute: upcoming_date_12
+    id: upcoming_date_12
+  - platform: homeassistant
+    entity_id: '${ha_tasks_data}'
+    attribute: upcoming_item_12
+    id: upcoming_item_12
+  - platform: homeassistant
+    entity_id: '${ha_tasks_data}'
+    attribute: upcoming_date_13
+    id: upcoming_date_13
+  - platform: homeassistant
+    entity_id: '${ha_tasks_data}'
+    attribute: upcoming_item_13
+    id: upcoming_item_13
+  - platform: homeassistant
+    entity_id: '${ha_tasks_data}'
+    attribute: upcoming_date_14
+    id: upcoming_date_14
+  - platform: homeassistant
+    entity_id: '${ha_tasks_data}'
+    attribute: upcoming_item_14
+    id: upcoming_item_14
+  - platform: homeassistant
+    entity_id: '${ha_tasks_data}'
+    attribute: upcoming_date_15
+    id: upcoming_date_15
+  - platform: homeassistant
+    entity_id: '${ha_tasks_data}'
+    attribute: upcoming_item_15
+    id: upcoming_item_15
+  - platform: homeassistant
+    entity_id: '${ha_tasks_data}'
+    attribute: upcoming_date_16
+    id: upcoming_date_16
+  - platform: homeassistant
+    entity_id: '${ha_tasks_data}'
+    attribute: upcoming_item_16
+    id: upcoming_item_16
+  - platform: homeassistant
+    entity_id: '${ha_tasks_data}'
+    attribute: upcoming_date_17
+    id: upcoming_date_17
+  - platform: homeassistant
+    entity_id: '${ha_tasks_data}'
+    attribute: upcoming_item_17
+    id: upcoming_item_17
+  - platform: homeassistant
+    entity_id: '${ha_tasks_data}'
+    attribute: upcoming_date_18
+    id: upcoming_date_18
+  - platform: homeassistant
+    entity_id: '${ha_tasks_data}'
+    attribute: upcoming_item_18
+    id: upcoming_item_18
 
 # Now render everything on the ePaper screen.
 display:
@@ -533,14 +600,7 @@ display:
     setup_priority: 1000
     rotation: 90°
     lambda: |-
-      // Map sync icon to MDI character
-      std::map<std::string, std::string> sync_icon_map
-        {
-          {"sync", "\U000F04E6"}
-        };
-
-      // Left from Madelena's code... perhaps if you want a black or colored background first (useful for fast-refresh screens?)
-      // Fill background.
+      // Left from Madelena's code... perhaps if you want a black or colored background first (useful for fast-refresh screens?) to fill the background.
       // it.fill(color_bg);
 
       // Alignment rectangles! (uncomment to use - useful when first mounting the eInk screen)
@@ -634,57 +694,147 @@ display:
         row = row + spacing_upcoming_item;
       }
       if ((row <= lastrow) && (! (id(upcoming_item_1).state.empty()))) {
-        it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_1).state + ":").c_str());
-        row = row + spacing_upcoming_date;
+        if (id(upcoming_date_1).state.compare(id(upcoming_date_0).state) != 0) {
+          it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_1).state + ":").c_str());
+          row = row + spacing_upcoming_date;
+        }
         it.printf(col, row, id(font_upcoming_item), color_blk, TextAlign::TOP_LEFT, "%s", ("  " + id(upcoming_item_1).state).c_str());
         row = row + spacing_upcoming_item;
       }
       if ((row <= lastrow) && (! (id(upcoming_item_2).state.empty()))) {
-        it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_2).state + ":").c_str());
-        row = row + spacing_upcoming_date;
+        if (id(upcoming_date_2).state.compare(id(upcoming_date_1).state) != 0) {
+          it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_2).state + ":").c_str());
+          row = row + spacing_upcoming_date;
+        }
         it.printf(col, row, id(font_upcoming_item), color_blk, TextAlign::TOP_LEFT, "%s", ("  " + id(upcoming_item_2).state).c_str());
         row = row + spacing_upcoming_item;
       }
       if ((row <= lastrow) && (! (id(upcoming_item_3).state.empty()))) {
-        it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_3).state + ":").c_str());
-        row = row + spacing_upcoming_date;
+        if (id(upcoming_date_3).state.compare(id(upcoming_date_2).state) != 0) {
+          it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_3).state + ":").c_str());
+          row = row + spacing_upcoming_date;
+        }
         it.printf(col, row, id(font_upcoming_item), color_blk, TextAlign::TOP_LEFT, "%s", ("  " + id(upcoming_item_3).state).c_str());
         row = row + spacing_upcoming_item;
       }
       if ((row <= lastrow) && (! (id(upcoming_item_4).state.empty()))) {
-        it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_4).state + ":").c_str());
-        row = row + spacing_upcoming_date;
+        if (id(upcoming_date_4).state.compare(id(upcoming_date_3).state) != 0) {
+          it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_4).state + ":").c_str());
+          row = row + spacing_upcoming_date;
+        }
         it.printf(col, row, id(font_upcoming_item), color_blk, TextAlign::TOP_LEFT, "%s", ("  " + id(upcoming_item_4).state).c_str());
         row = row + spacing_upcoming_item;
       }
       if ((row <= lastrow) && (! (id(upcoming_item_5).state.empty()))) {
-        it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_5).state + ":").c_str());
-        row = row + spacing_upcoming_date;
+        if (id(upcoming_date_5).state.compare(id(upcoming_date_4).state) != 0) {
+          it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_5).state + ":").c_str());
+          row = row + spacing_upcoming_date;
+        }
         it.printf(col, row, id(font_upcoming_item), color_blk, TextAlign::TOP_LEFT, "%s", ("  " + id(upcoming_item_5).state).c_str());
         row = row + spacing_upcoming_item;
       }
       if ((row <= lastrow) && (! (id(upcoming_item_6).state.empty()))) {
-        it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_6).state + ":").c_str());
-        row = row + spacing_upcoming_date;
+        if (id(upcoming_date_6).state.compare(id(upcoming_date_5).state) != 0) {
+          it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_6).state + ":").c_str());
+          row = row + spacing_upcoming_date;
+        }
         it.printf(col, row, id(font_upcoming_item), color_blk, TextAlign::TOP_LEFT, "%s", ("  " + id(upcoming_item_6).state).c_str());
         row = row + spacing_upcoming_item;
       }
       if ((row <= lastrow) && (! (id(upcoming_item_7).state.empty()))) {
-        it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_7).state + ":").c_str());
-        row = row + spacing_upcoming_date;
+        if (id(upcoming_date_7).state.compare(id(upcoming_date_6).state) != 0) {
+          it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_7).state + ":").c_str());
+          row = row + spacing_upcoming_date;
+        }
         it.printf(col, row, id(font_upcoming_item), color_blk, TextAlign::TOP_LEFT, "%s", ("  " + id(upcoming_item_7).state).c_str());
         row = row + spacing_upcoming_item;
       }
       if ((row <= lastrow) && (! (id(upcoming_item_8).state.empty()))) {
-        it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_8).state + ":").c_str());
-        row = row + spacing_upcoming_date;
+        if (id(upcoming_date_8).state.compare(id(upcoming_date_7).state) != 0) {
+          it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_8).state + ":").c_str());
+          row = row + spacing_upcoming_date;
+        }
         it.printf(col, row, id(font_upcoming_item), color_blk, TextAlign::TOP_LEFT, "%s", ("  " + id(upcoming_item_8).state).c_str());
         row = row + spacing_upcoming_item;
       }
       if ((row <= lastrow) && (! (id(upcoming_item_9).state.empty()))) {
-        it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_9).state + ":").c_str());
-        row = row + spacing_upcoming_date;
+        if (id(upcoming_date_9).state.compare(id(upcoming_date_8).state) != 0) {
+          it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_9).state + ":").c_str());
+          row = row + spacing_upcoming_date;
+        }
         it.printf(col, row, id(font_upcoming_item), color_blk, TextAlign::TOP_LEFT, "%s", ("  " + id(upcoming_item_9).state).c_str());
+        row = row + spacing_upcoming_item;
+      }
+      if ((row <= lastrow) && (! (id(upcoming_item_10).state.empty()))) {
+        if (id(upcoming_date_10).state.compare(id(upcoming_date_9).state) != 0) {
+          it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_10).state + ":").c_str());
+          row = row + spacing_upcoming_date;
+        }
+        it.printf(col, row, id(font_upcoming_item), color_blk, TextAlign::TOP_LEFT, "%s", ("  " + id(upcoming_item_10).state).c_str());
+        row = row + spacing_upcoming_item;
+      }
+      if ((row <= lastrow) && (! (id(upcoming_item_11).state.empty()))) {
+        if (id(upcoming_date_11).state.compare(id(upcoming_date_10).state) != 0) {
+          it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_11).state + ":").c_str());
+          row = row + spacing_upcoming_date;
+        }
+        it.printf(col, row, id(font_upcoming_item), color_blk, TextAlign::TOP_LEFT, "%s", ("  " + id(upcoming_item_11).state).c_str());
+        row = row + spacing_upcoming_item;
+      }
+      if ((row <= lastrow) && (! (id(upcoming_item_12).state.empty()))) {
+        if (id(upcoming_date_12).state.compare(id(upcoming_date_11).state) != 0) {
+          it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_12).state + ":").c_str());
+          row = row + spacing_upcoming_date;
+        }
+        it.printf(col, row, id(font_upcoming_item), color_blk, TextAlign::TOP_LEFT, "%s", ("  " + id(upcoming_item_12).state).c_str());
+        row = row + spacing_upcoming_item;
+      }
+      if ((row <= lastrow) && (! (id(upcoming_item_13).state.empty()))) {
+        if (id(upcoming_date_13).state.compare(id(upcoming_date_12).state) != 0) {
+          it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_13).state + ":").c_str());
+          row = row + spacing_upcoming_date;
+        }
+        it.printf(col, row, id(font_upcoming_item), color_blk, TextAlign::TOP_LEFT, "%s", ("  " + id(upcoming_item_13).state).c_str());
+        row = row + spacing_upcoming_item;
+      }
+      if ((row <= lastrow) && (! (id(upcoming_item_14).state.empty()))) {
+        if (id(upcoming_date_14).state.compare(id(upcoming_date_13).state) != 0) {
+          it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_14).state + ":").c_str());
+          row = row + spacing_upcoming_date;
+        }
+        it.printf(col, row, id(font_upcoming_item), color_blk, TextAlign::TOP_LEFT, "%s", ("  " + id(upcoming_item_14).state).c_str());
+        row = row + spacing_upcoming_item;
+      }
+      if ((row <= lastrow) && (! (id(upcoming_item_15).state.empty()))) {
+        if (id(upcoming_date_15).state.compare(id(upcoming_date_14).state) != 0) {
+          it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_15).state + ":").c_str());
+          row = row + spacing_upcoming_date;
+        }
+        it.printf(col, row, id(font_upcoming_item), color_blk, TextAlign::TOP_LEFT, "%s", ("  " + id(upcoming_item_15).state).c_str());
+        row = row + spacing_upcoming_item;
+      }
+      if ((row <= lastrow) && (! (id(upcoming_item_16).state.empty()))) {
+        if (id(upcoming_date_16).state.compare(id(upcoming_date_15).state) != 0) {
+          it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_16).state + ":").c_str());
+          row = row + spacing_upcoming_date;
+        }
+        it.printf(col, row, id(font_upcoming_item), color_blk, TextAlign::TOP_LEFT, "%s", ("  " + id(upcoming_item_16).state).c_str());
+        row = row + spacing_upcoming_item;
+      }
+      if ((row <= lastrow) && (! (id(upcoming_item_17).state.empty()))) {
+        if (id(upcoming_date_17).state.compare(id(upcoming_date_16).state) != 0) {
+          it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_17).state + ":").c_str());
+          row = row + spacing_upcoming_date;
+        }
+        it.printf(col, row, id(font_upcoming_item), color_blk, TextAlign::TOP_LEFT, "%s", ("  " + id(upcoming_item_17).state).c_str());
+        row = row + spacing_upcoming_item;
+      }
+      if ((row <= lastrow) && (! (id(upcoming_item_18).state.empty()))) {
+        if (id(upcoming_date_18).state.compare(id(upcoming_date_17).state) != 0) {
+          it.printf(col, row, id(font_upcoming_date), color_blk, TextAlign::TOP_LEFT, "%s", (id(upcoming_date_18).state + ":").c_str());
+          row = row + spacing_upcoming_date;
+        }
+        it.printf(col, row, id(font_upcoming_item), color_blk, TextAlign::TOP_LEFT, "%s", ("  " + id(upcoming_item_18).state).c_str());
         row = row + spacing_upcoming_item;
       }
 

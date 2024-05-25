@@ -108,7 +108,7 @@
           {# -- end searching -- #}
           {{todo_today.todo}}
         upcoming: >
-          {%- set latest_date = 29 -%}
+          {%- set latest_date = 64 -%}
           {%- set todo_counter = namespace(total = 0) -%}
           {%- set todo_upcoming = namespace(todo = []) -%}
           {%- for v in range(latest_date) -%}
@@ -129,69 +129,108 @@
                 {%- set todo_counter.total = todo_counter.total + 1 -%}
               {%- endif -%}
             {%- endfor -%}
-          {# -- end searching -- #}
+            {# -- end searching -- #}
+            {%- if todo_counter.total >= 20 -%}
+              {%- break -%}
+            {%- endif -%}
           {%- endfor -%}
           {{todo_upcoming.todo}}
         today_0: >
-          {{ state_attr('sensor.eink_tasksboard_data','today')[0] | default('') }}
+          {{ this.attributes.today[0] | default('') }}
         today_1: >
-          {{ state_attr('sensor.eink_tasksboard_data','today')[1] | default('') }}
+          {{ this.attributes.today[1] | default('') }}
         today_2: >
-          {{ state_attr('sensor.eink_tasksboard_data','today')[2] | default('') }}
+          {{ this.attributes.today[2] | default('') }}
         today_3: >
-          {{ state_attr('sensor.eink_tasksboard_data','today')[3] | default('') }}
+          {{ this.attributes.today[3] | default('') }}
         today_4: >
-          {{ state_attr('sensor.eink_tasksboard_data','today')[4] | default('') }}
+          {{ this.attributes.today[4] | default('') }}
         today_5: >
-          {{ state_attr('sensor.eink_tasksboard_data','today')[5] | default('') }}
+          {{ this.attributes.today[5] | default('') }}
         today_6: >
-          {{ state_attr('sensor.eink_tasksboard_data','today')[6] | default('') }}
+          {{ this.attributes.today[6] | default('') }}
         today_7: >
-          {{ state_attr('sensor.eink_tasksboard_data','today')[7] | default('') }}
+          {{ this.attributes.today[7] | default('') }}
         today_8: >
-          {{ state_attr('sensor.eink_tasksboard_data','today')[8] | default('') }}
+          {{ this.attributes.today[8] | default('') }}
         today_9: >
-          {{ state_attr('sensor.eink_tasksboard_data','today')[9] | default('') }}
+          {{ this.attributes.today[9] | default('') }}
         upcoming_date_0: >
-          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[0] | default('') }}
+          {{ this.attributes.upcoming[0] | default('') }}
         upcoming_item_0: >
-          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[1] | default('') }}
+          {{ this.attributes.upcoming[1] | default('') }}
         upcoming_date_1: >
-          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[2] | default('') }}
+          {{ this.attributes.upcoming[2] | default('') }}
         upcoming_item_1: >
-          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[3] | default('') }}
+          {{ this.attributes.upcoming[3] | default('') }}
         upcoming_date_2: >
-          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[4] | default('') }}
+          {{ this.attributes.upcoming[4] | default('') }}
         upcoming_item_2: >
-          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[5] | default('') }}
+          {{ this.attributes.upcoming[5] | default('') }}
         upcoming_date_3: >
-          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[6] | default('') }}
+          {{ this.attributes.upcoming[6] | default('') }}
         upcoming_item_3: >
-          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[7] | default('') }}
+          {{ this.attributes.upcoming[7] | default('') }}
         upcoming_date_4: >
-          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[8] | default('') }}
+          {{ this.attributes.upcoming[8] | default('') }}
         upcoming_item_4: >
-          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[9] | default('') }}
+          {{ this.attributes.upcoming[9] | default('') }}
         upcoming_date_5: >
-          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[10] | default('') }}
+          {{ this.attributes.upcoming[10] | default('') }}
         upcoming_item_5: >
-          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[11] | default('') }}
+          {{ this.attributes.upcoming[11] | default('') }}
         upcoming_date_6: >
-          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[12] | default('') }}
+          {{ this.attributes.upcoming[12] | default('') }}
         upcoming_item_6: >
-          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[13] | default('') }}
+          {{ this.attributes.upcoming[13] | default('') }}
         upcoming_date_7: >
-          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[14] | default('') }}
+          {{ this.attributes.upcoming[14] | default('') }}
         upcoming_item_7: >
-          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[15] | default('') }}
+          {{ this.attributes.upcoming[15] | default('') }}
         upcoming_date_8: >
-          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[16] | default('') }}
+          {{ this.attributes.upcoming[16] | default('') }}
         upcoming_item_8: >
-          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[17] | default('') }}
+          {{ this.attributes.upcoming[17] | default('') }}
         upcoming_date_9: >
-          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[18] | default('') }}
+          {{ this.attributes.upcoming[18] | default('') }}
         upcoming_item_9: >
-          {{ state_attr('sensor.eink_tasksboard_data','upcoming')[19] | default('') }}
+          {{ this.attributes.upcoming[19] | default('') }}
+        upcoming_date_10: >
+          {{ this.attributes.upcoming[20] | default('') }}
+        upcoming_item_10: >
+          {{ this.attributes.upcoming[21] | default('') }}
+        upcoming_date_11: >
+          {{ this.attributes.upcoming[22] | default('') }}
+        upcoming_item_11: >
+          {{ this.attributes.upcoming[23] | default('') }}
+        upcoming_date_12: >
+          {{ this.attributes.upcoming[24] | default('') }}
+        upcoming_item_12: >
+          {{ this.attributes.upcoming[25] | default('') }}
+        upcoming_date_13: >
+          {{ this.attributes.upcoming[26] | default('') }}
+        upcoming_item_13: >
+          {{ this.attributes.upcoming[27] | default('') }}
+        upcoming_date_14: >
+          {{ this.attributes.upcoming[28] | default('') }}
+        upcoming_item_14: >
+          {{ this.attributes.upcoming[29] | default('') }}
+        upcoming_date_15: >
+          {{ this.attributes.upcoming[30] | default('') }}
+        upcoming_item_15: >
+          {{ this.attributes.upcoming[31] | default('') }}
+        upcoming_date_16: >
+          {{ this.attributes.upcoming[32] | default('') }}
+        upcoming_item_16: >
+          {{ this.attributes.upcoming[33] | default('') }}
+        upcoming_date_17: >
+          {{ this.attributes.upcoming[34] | default('') }}
+        upcoming_item_17: >
+          {{ this.attributes.upcoming[35] | default('') }}
+        upcoming_date_18: >
+          {{ this.attributes.upcoming[36] | default('') }}
+        upcoming_item_18: >
+          {{ this.attributes.upcoming[37] | default('') }}
   
 - trigger:
     - platform: time_pattern
