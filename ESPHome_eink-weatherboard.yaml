@@ -171,17 +171,23 @@ script:
       - wait_until:
           condition:
             lambda: 'return id(data_updated) == true;'
-      - delay: 10s # Wait a bit longer so all the items are received. Might need to be more.
-      - logger.log: "Sensor data received."
-      - script.execute: refresh_screen
+          timeout: 60s
+      - if:
+          condition:
+            lambda: 'return id(data_updated) == true;'
+          then:
+            - delay: 10s # Wait a bit longer so all the items are received. Might need to be more.
+            - logger.log: "Sensor data received."
+            - script.execute: refresh_screen
+          else:
+            - logger.log: "No new data. Skipping display refresh."
+            - script.execute: deep_sleep_evaluation
   - id: refresh_screen
     mode: restart
     then:
       - if:
           condition:
-            and:
-              - lambda: 'return id(data_updated) == true;'
-              - binary_sensor.is_off: disable_update
+            binary_sensor.is_off: disable_update
           then:
             - lambda: 'id(recorded_display_refresh) += 1;'
             - lambda: 'id(display_last_update).publish_state(id(homeassistant_time).now().timestamp);'
@@ -190,7 +196,7 @@ script:
             - component.update: eink_display
             - lambda: 'id(data_updated) = false;'
           else:
-            - logger.log: "No new data or Home Assistant Helper 'Disable Update' is on. Skipping display refresh."
+            - logger.log: "Home Assistant Helper 'Disable Update' is on. Skipping display refresh."
       - script.execute: deep_sleep_evaluation
   - id: deep_sleep_evaluation
     # This dynamic deep sleep script inspired by https://webbinaro.dev/blog/battery-powered-esp-sensors-esphome/
