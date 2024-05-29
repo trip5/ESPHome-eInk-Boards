@@ -396,38 +396,65 @@ text_sensor:
     entity_id: '${ha_tasks_data}'
     attribute: today_1
     id: today_1
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: today_2
     id: today_2
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: today_3
     id: today_3
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: today_4
     id: today_4
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: today_5
     id: today_5
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: today_6
     id: today_6
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: today_7
     id: today_7
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: today_8
     id: today_8
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: today_9
     id: today_9
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
 
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
@@ -447,146 +474,254 @@ text_sensor:
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_date_1
     id: upcoming_date_1
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_item_1
     id: upcoming_item_1
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_date_2
     id: upcoming_date_2
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_item_2
     id: upcoming_item_2
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_date_3
     id: upcoming_date_3
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_item_3
     id: upcoming_item_3
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_date_4
     id: upcoming_date_4
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_item_4
     id: upcoming_item_4
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_date_5
     id: upcoming_date_5
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_item_5
     id: upcoming_item_5
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_date_6
     id: upcoming_date_6
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_item_6
     id: upcoming_item_6
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_date_7
     id: upcoming_date_7
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_item_7
     id: upcoming_item_7
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_date_8
     id: upcoming_date_8
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_item_8
     id: upcoming_item_8
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_date_9
     id: upcoming_date_9
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_item_9
     id: upcoming_item_9
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_date_10
     id: upcoming_date_10
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_item_10
     id: upcoming_item_10
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_date_11
     id: upcoming_date_11
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_item_11
     id: upcoming_item_11
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_date_12
     id: upcoming_date_12
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_item_12
     id: upcoming_item_12
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_date_13
     id: upcoming_date_13
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_item_13
     id: upcoming_item_13
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_date_14
     id: upcoming_date_14
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_item_14
     id: upcoming_item_14
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_date_15
     id: upcoming_date_15
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_item_15
     id: upcoming_item_15
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_date_16
     id: upcoming_date_16
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_item_16
     id: upcoming_item_16
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_date_17
     id: upcoming_date_17
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_item_17
     id: upcoming_item_17
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_date_18
     id: upcoming_date_18
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_tasks_data}'
     attribute: upcoming_item_18
     id: upcoming_item_18
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
 
 # Now render everything on the ePaper screen.
 display:

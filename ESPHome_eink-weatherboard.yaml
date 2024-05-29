@@ -403,34 +403,58 @@ sensor:
     entity_id: '${ha_weather_data}'
     attribute: weather_now_temperature
     id: weather_now_temperature
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_hourly_temperature_0
     id: weather_hourly_temperature_0
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_hourly_temperature_1
     id: weather_hourly_temperature_1
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_hourly_temperature_2
     id: weather_hourly_temperature_2
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_hourly_temperature_3
     id: weather_hourly_temperature_3
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_daily_temperature_0
     id: weather_daily_temperature_0
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_daily_temperature_1
     id: weather_daily_temperature_1
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_daily_temperature_2
     id: weather_daily_temperature_2
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     name: "$friendly_name Wake Time Helper"
     id: wake_time_helper
@@ -465,58 +489,100 @@ text_sensor:
     entity_id: '${ha_weather_data}'
     attribute: weather_now_condition
     id: weather_now_condition
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_hourly_condition_0
     id: weather_hourly_condition_0
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_hourly_timestamp_0
     id: weather_hourly_timestamp_0
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_hourly_condition_1
     id: weather_hourly_condition_1
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_hourly_timestamp_1
     id: weather_hourly_timestamp_1
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_hourly_condition_2
     id: weather_hourly_condition_2
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_hourly_timestamp_2
     id: weather_hourly_timestamp_2
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_hourly_condition_3
     id: weather_hourly_condition_3
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_hourly_timestamp_3
     id: weather_hourly_timestamp_3
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_daily_condition_0
     id: weather_daily_condition_0
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_daily_timestamp_0
     id: weather_daily_timestamp_0
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_daily_condition_1
     id: weather_daily_condition_1
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_daily_timestamp_1
     id: weather_daily_timestamp_1
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_daily_condition_2
     id: weather_daily_condition_2
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
     entity_id: '${ha_weather_data}'
     attribute: weather_daily_timestamp_2
@@ -583,15 +649,15 @@ display:
       // it.fill(color_bg);
 
       // Alignment rectangles! (uncomment to use - useful when first mounting the eInk screen)
-      //it.rectangle(0, 0, 480, 800);
-      //it.rectangle(10, 10, 460, 780);
-      //it.rectangle(20, 20, 440, 760);
-      //it.rectangle(30, 30, 420, 740);
-      //it.rectangle(40, 40, 400, 720);
-      //it.rectangle(50, 50, 380, 700);
-      //it.rectangle(60, 60, 360, 680);
-      //it.rectangle(70, 70, 340, 660);
-      //it.rectangle(80, 80, 320, 640);
+      it.rectangle(0, 0, 480, 800);
+      it.rectangle(10, 10, 460, 780);
+      it.rectangle(20, 20, 440, 760);
+      it.rectangle(30, 30, 420, 740);
+      it.rectangle(40, 40, 400, 720);
+      it.rectangle(50, 50, 380, 700);
+      it.rectangle(60, 60, 360, 680);
+      it.rectangle(70, 70, 340, 660);
+      it.rectangle(80, 80, 320, 640);
 
       // CURRENT WEATHER
       it.printf(240, 84, id(font_title), color_red, TextAlign::TOP_CENTER, "WEATHER");
