@@ -649,15 +649,16 @@ display:
       // it.fill(color_bg);
 
       // Alignment rectangles! (uncomment to use - useful when first mounting the eInk screen)
-      it.rectangle(0, 0, 480, 800);
-      it.rectangle(10, 10, 460, 780);
-      it.rectangle(20, 20, 440, 760);
-      it.rectangle(30, 30, 420, 740);
-      it.rectangle(40, 40, 400, 720);
-      it.rectangle(50, 50, 380, 700);
-      it.rectangle(60, 60, 360, 680);
-      it.rectangle(70, 70, 340, 660);
-      it.rectangle(80, 80, 320, 640);
+      // it.rectangle(0, 0, 480, 800);
+      // it.rectangle(10, 10, 460, 780);
+      // it.rectangle(20, 20, 440, 760);
+      // it.rectangle(30, 30, 420, 740);
+      // it.rectangle(40, 40, 400, 720);
+      // it.rectangle(50, 50, 380, 700);
+      // it.rectangle(60, 60, 360, 680);
+      // it.rectangle(70, 70, 340, 660);
+      // it.rectangle(80, 80, 320, 640);
+
 
       // CURRENT WEATHER
       it.printf(240, 84, id(font_title), color_red, TextAlign::TOP_CENTER, "WEATHER");
