@@ -68,8 +68,6 @@ esphome:
       priority: 200.0
       then:
         #- lambda: 'id(recorded_display_refresh) = 63;' # if you need to manually update the number of refreshes
-        - light.turn_on: led1
-        - script.execute: led_blink
         - script.execute: get_data_then_refresh_screen
 
 esp32:
@@ -168,6 +166,7 @@ script:
   - id: get_data_then_refresh_screen
     mode: restart
     then:
+      - script.execute: led_blink
       - wait_until:
           condition:
             lambda: 'return id(data_updated) == true;'
@@ -193,7 +192,9 @@ script:
             - lambda: 'id(display_last_update).publish_state(id(homeassistant_time).now().timestamp);'
             - output.turn_on: statusled
             - logger.log: "Refreshing display..."
+            - light.turn_on: led1
             - component.update: eink_display
+            - script.execute: led_blink
             - lambda: 'id(data_updated) = false;'
           else:
             - logger.log: "Home Assistant Helper 'Disable Update' is on. Skipping display refresh."
