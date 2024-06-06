@@ -73,15 +73,15 @@
           {# search calendar #}
           {%- for events in mycalendar["calendar.family"]["events"] -%}
             {%- if "start" in events and (now().date()|string) in events.start -%}
-              {%- set todo_item.todo = todo_item.todo + [(events.summary)] -%}
-              {%- set todo_counter.total = todo_counter.total + 1 -%}
+              {%- set todo_today.todo = todo_today.todo + [(events.summary)] -%}
+              {%- set todo_today_counter.total = todo_today_counter.total + 1 -%}
             {%- endif -%}
           {%- endfor -%}
           {# search calendar and add a note #}
           {%- for events in mycalendar["calendar.holidays_in_south_korea"]["events"] -%}
             {%- if "start" in events and (now().date()|string) in events.start -%}
-              {%- set todo_item.todo = todo_item.todo + ["Korea: " + (events.summary)] -%}
-              {%- set todo_counter.total = todo_counter.total + 1 -%}
+              {%- set todo_today.todo = todo_today.todo + ["Korea: " + (events.summary)] -%}
+              {%- set todo_today_counter.total = todo_today_counter.total + 1 -%}
             {%- endif -%}
           {%- endfor -%}
           {# search todo list #}
