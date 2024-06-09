@@ -16,7 +16,7 @@ Put this in your `configuration.yaml`:
 template: !include template.yaml
 ```
 
-Anything in `configuration.yaml` under the `template:` heading must now be moved to `template.yaml`. Take a quick look [here](https://community.home-assistant.io/t/) for some examples on an easy way to format `template.yaml`.
+Anything in `configuration.yaml` under the `template:` heading must now be moved to `template.yaml`. Take a quick look [here](https://community.home-assistant.io/t/how-do-i-setup-template-trigger-sensor-in-a-splitting-config/718626/) for some examples on an easy way to format `template.yaml`.
 
 #### WeatherBoard
 
