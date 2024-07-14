@@ -24,9 +24,9 @@ My Weatherboard code if heavily derived from Madelena Mak's [Weatherman Dashboar
 
 This relies on the OpenWeatherMap integration to function.  In its unedited form, requires 2 services: `openweathermap` (onecall_daily) and `openweathermap_hourly` (onecall_hourly). Read more about that [here](https://www.home-assistant.io/integrations/openweathermap). You may need to use 2 different locations (just make it slightly different).
 
-My YAML uses 2-hour increments to the hourly forecast.  Look for the [0], [2], [4], [6] patterns in the code if you wish to adjust this.  There are also notes in the code about how to change the datestamp if you don't prefer the formats I use.  Other than those 2 points, there should not be much editing of the code to make it functional.  Except, of course, for the waketimes.  See the notes below.
+My YAML uses 2-hour increments to the hourly forecast.  Look for the [0], [2], [4], [6] patterns in the code if you wish to adjust this.  There are also notes in the code about how to change the datestamp if you don't prefer the formats I use.  Other than those 2 points, there should not be much editing of the code to make it functional.  Except, of course, for the waketimes.  See the notes below and in the yaml.
 
-[`HomeAssistant_template_tasks.yaml`](HomeAssistant_template_tasks.yaml)
+[`HomeAssistant_template_weather.yaml`](HomeAssistant_template_weather.yaml)
 
 #### TasksBoard
 
@@ -93,7 +93,7 @@ Please note that you may see a missing glyph (always a black box ■) on your bo
 - Waveshare 7.5inch Three-color e-Paper Display: https://www.aliexpress.com/item/32833402189.html
 - Waveshare Universal e-Paper Driver Board (ESP32 version): https://www.aliexpress.com/item/32953365564.html
 - IKEA RÖDALM 13x18cm (5x7 inch) Frame (3.2cm / 1.25inch depth): https://www.ikea.com/kr/en/p/roedalm-frame-walnut-effect-20550039/
-- 3x7mm PCB with 2.54mm pitch 3.7V 10000mAh: https://www.aliexpress.com/item/32330593301.html
+- 3x7mm PCB with 2.54mm pitch: https://www.aliexpress.com/item/32330593301.html
 - SM-2P & SM-2R connectors: https://www.aliexpress.com/item/33003863385.html
 - 33K and 100K resistors
 - 16V 1000UF capacitor (optional)
@@ -166,6 +166,7 @@ Also you can see a white bit cut out of what used to be the spacer at the front 
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
+| 2024.07.14 | Fixes to ESPHome OTA & how sensors reported to HA |
 | 2024.05.25 | First release    |
 
 ## Download Gotham-Rounded Fonts (from this Github)

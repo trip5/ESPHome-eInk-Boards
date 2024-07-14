@@ -7,7 +7,7 @@ substitutions:
   friendly_name: eInk-WeatherBoard
   project_name: "Trip5.eInk-WeatherBoard"
   comment: "eInk-WeatherBoard from Trip5"
-  project_version: "2023.05.25"
+  project_version: "2023.07.14"
   time_zone: "Asia/Seoul" # Check https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
   adc_pin: GPIO34
   sleep_time: 60min # this is the default but is overridden
@@ -35,28 +35,30 @@ substitutions:
   # model: 7.50in-bV3 # a bit washed-out (use white 100%)
   # model: 7.50inV2alt # a bit washed-out (use white 100%)
 
-  # I prefer atomicmike's custom component - be sure it's specified properly below too! (inverted true)
-  model: 7.50inv2b
-  reset_duration: 3ms
+  # Two custom components work with the 7.5 inch Waveshare displays... If you want to see the full discussion: https://github.com/esphome/feature-requests/issues/239
 
-  # Also possible is twisterss' custom component - be sure it's specified properly below too! (inverted true)
-  # model: 7.50in-bv2-rb
-  # reset_duration: 2ms
+  # atomicmike's custom component should be closer to the manufacturer's spec but but might have issues - be sure it's specified properly below too! (inverted true)
+  # model: 7.50inv2b
+  # reset_duration: 3ms
+
+  # There is some speculation that twisterss' custom component might be better - be sure it's specified properly below too! (inverted true)
+  model: 7.50in-bv2-rb
+  reset_duration: 2ms
 
 external_components:
 # use atomicmike's repo:
-  - source:
-      type: git
-      url: https://github.com/atomicmike/esphome.git
-      ref: waveshare-color-2023.12
-    components: [ waveshare_epaper ]
-
-# use twisterss' repo:
 #  - source:
 #      type: git
-#      url:  https://github.com/twisterss/esphome-dev.git
-#      ref: waveshare-red-black
+#      url: https://github.com/atomicmike/esphome.git
+#      ref: waveshare-color-2023.12
 #    components: [ waveshare_epaper ]
+
+# use twisterss' repo:
+  - source:
+      type: git
+      url:  https://github.com/twisterss/esphome-dev.git
+      ref: waveshare-red-black
+    components: [ waveshare_epaper ]
 
 esphome:
   name: $name
@@ -75,8 +77,12 @@ esp32:
   framework:
     type: arduino
 
+preferences:
+  flash_write_interval: 5s # default is 1min but seems sometimes id(recorded_display_refresh) doesn't get saved unless this is short
+
 ota:
-  password: !secret ota_password
+  - platform: esphome
+    password: !secret ota_password
 
 wifi:
   ssid: !secret wifi_ssid
@@ -89,11 +95,11 @@ wifi:
 web_server:
   port: 80
   ota: true
-  include_internal: true
+  include_internal: true # probably not necessary, as it will expose more than needed to the Web UI
 
 captive_portal:
 
-# Enable logging (and stops the LED from spamming the log) - it would also be OK to change the main level to ERROR
+# Enable logging (and stops the various sensors/switches from spamming the log) - if you need more data, change to DEBUG
 logger:
   level: DEBUG
   logs:
@@ -171,6 +177,15 @@ script:
           condition:
             lambda: 'return id(data_updated) == true;'
           timeout: 60s
+      - wait_until: # should wait until the wake_time_helper is actually updated (to evaluate the next condition)
+          condition:
+            lambda: 'return id(wake_time_helper_updated) == true;'
+          timeout: 2min
+      - if:  # with longer sleep delays, the ESP32 tends to wake up a bit too early... if the wake time is within the next 8 minutes, wait for the scheduled wake time (less 30s) (preventing it from updating twice in a row)
+          condition:
+            lambda: 'return (id(wake_time_helper).state <= (8 * 60));'
+          then:
+            - delay: !lambda 'return (((id(wake_time_helper).state) - 30) * 1000);' # lambdas should return value as ms
       - if:
           condition:
             lambda: 'return id(data_updated) == true;'
@@ -196,6 +211,7 @@ script:
             - component.update: eink_display
             - script.execute: led_blink
             - lambda: 'id(data_updated) = false;'
+            - delay: 5s # If deep sleep follows immediately, then we need a short delay here so HA catches the refresh count
           else:
             - logger.log: "Home Assistant Helper 'Disable Update' is on. Skipping display refresh."
       - script.execute: deep_sleep_evaluation
@@ -212,14 +228,10 @@ script:
           else:
             - wait_until:
                 condition:
-                  lambda: 'return id(wake_time_helper_updated) == true;'
-            - wait_until:
-                condition:
-                  lambda: 'return (id(wake_time_helper).state >= 120);'
-            - lambda: 'id(wake_time_helper_updated) = false;'
+                  lambda: 'return (id(wake_time_helper).state >= (6 * 60));'
             - deep_sleep.enter:
                 id: deep_sleep_control
-                sleep_duration: !lambda return id(wake_time_helper).state * 1000;   #lambdas should return value as ms
+                sleep_duration: !lambda return id(wake_time_helper).state * 1000; # lambdas should return value as ms
       - delay: 60s
       - script.execute: deep_sleep_evaluation
   - id: deep_sleep_disabled_check_refresh_time
@@ -374,6 +386,7 @@ sensor:
     device_class: timestamp
     entity_category: "diagnostic"
     id: display_last_update
+    update_interval: 15s
   - platform: template
     name: "$friendly_name Recorded Display Refresh"
     accuracy_decimals: 0
@@ -381,23 +394,36 @@ sensor:
     state_class: "total_increasing"
     entity_category: "diagnostic"
     lambda: 'return id(recorded_display_refresh);'
+    update_interval: 15s
   - platform: wifi_signal
     name: "$friendly_name WiFi Signal Strength"
     id: wifisignal
     unit_of_measurement: "dBm"
     entity_category: "diagnostic"
-    update_interval: 60s
+    update_interval: 3s
+    filters:
+      #use moving median to smooth spikes
+      - median:
+          window_size: 5
+          send_every: 5
+          send_first_at: 5
   - platform: adc
     name: "$friendly_name Battery"
     id: battery_adc
     pin: $adc_pin
-    attenuation: 11db
-    update_interval: 60s
+    attenuation: 12db
+    update_interval: 3s
     entity_category: "diagnostic"
+    accuracy_decimals: 2
     filters:
-    - multiply: 1.33
-    # this multiply number may need to be manually adjusted with power on while idle
-    # I used a LiPo battery: negative pole -> 33K resistor -> ADC GPIO -> 100K resistor -> GND
+      # this multiply number may need to be manually adjusted with power on while idle
+      # I used a LiPo battery: negative pole -> 33K resistor -> ADC GPIO -> 100K resistor -> GND
+      - multiply: 1.33
+      #use moving median to smooth spikes
+      - median:
+          window_size: 5
+          send_every: 5
+          send_first_at: 5
 
   # Call numeric sensors from Home Assistant
   - platform: homeassistant
@@ -484,6 +510,7 @@ text_sensor:
     name: "$friendly_name $project_name Version"
     lambda: |-
       return {"$project_version"};
+    entity_category: diagnostic
 
   # Call text sensors from Home Assistant
   - platform: homeassistant
@@ -659,7 +686,6 @@ display:
       // it.rectangle(60, 60, 360, 680);
       // it.rectangle(70, 70, 340, 660);
       // it.rectangle(80, 80, 320, 640);
-
 
       // CURRENT WEATHER
       it.printf(240, 84, id(font_title), color_red, TextAlign::TOP_CENTER, "WEATHER");
