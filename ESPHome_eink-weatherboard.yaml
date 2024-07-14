@@ -105,6 +105,7 @@ logger:
   logs:
     light: ERROR
     script: ERROR
+    sensor: ERROR
 
 # Enable Home Assistant API
 api:
@@ -386,7 +387,7 @@ sensor:
     device_class: timestamp
     entity_category: "diagnostic"
     id: display_last_update
-    update_interval: 15s
+    update_interval: 3s
   - platform: template
     name: "$friendly_name Recorded Display Refresh"
     accuracy_decimals: 0
@@ -394,7 +395,7 @@ sensor:
     state_class: "total_increasing"
     entity_category: "diagnostic"
     lambda: 'return id(recorded_display_refresh);'
-    update_interval: 15s
+    update_interval: 3s
   - platform: wifi_signal
     name: "$friendly_name WiFi Signal Strength"
     id: wifisignal
