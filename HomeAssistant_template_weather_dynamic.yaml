@@ -244,3 +244,44 @@
           {{ daily["weather.openweathermap"].forecast[4].temperature | round }}
         weather_daily_timestamp_3: >
           {{ as_timestamp(daily["weather.openweathermap"].forecast[4].datetime) | timestamp_custom('%a') }}
+
+- trigger:
+    - platform: time_pattern
+      minutes: /1
+      variables:
+        waketime: >
+          {# Edit and order the schedule from midnight 00:00 to 23:59 as needed #}
+          {%- set waketimes = [] %}
+          {%- set waketimes = waketimes + ["00:05"] %}
+          {%- set waketimes = waketimes + ["06:05"] %}
+          {%- set waketimes = waketimes + ["08:05"] %}
+          {%- set waketimes = waketimes + ["10:05"] %}
+          {%- set waketimes = waketimes + ["12:05"] %}
+          {%- set waketimes = waketimes + ["14:05"] %}
+          {%- set waketimes = waketimes + ["16:05"] %}
+          {%- set waketimes = waketimes + ["18:05"] %}
+          {%- set waketimes = waketimes + ["21:05"] %}
+          {%- set waketime = namespace(next = "") %}
+          {%- set waketime_all = [] %}
+          {%- for test in waketimes %}
+            {%- set waketime.next = (now().strftime('%Y-%m-%d')|string) + " " + (test|string) %}
+            {%- if (now().strftime('%Y-%m-%d %H:%M:%S')|string|as_datetime) < (waketime.next|as_datetime) %}
+              {%- break %}
+            {%- endif %}
+          {%- endfor %}
+          {%- if (now().strftime('%Y-%m-%d %H:%M:%S')|string|as_datetime) > (waketime.next|as_datetime) %}
+            {%- set waketime.next = (now().strftime('%Y-%m-%d')|string) + " " + (waketimes[0]|string) %}
+            {%- set waketime_helper = ((as_timestamp(waketime.next|as_datetime + timedelta(days=1)) - as_timestamp(now()|as_datetime))|int(0)) %}
+          {%- else %}
+            {%- set waketime_helper = ((as_timestamp(waketime.next|as_datetime) - as_timestamp(now()|as_datetime))|int(0)) %}
+          {%- endif %}
+          {%- set waketime_all = [waketime.next] + [waketime_helper] + [waketimes] %}
+          {{waketime_all}}
+  sensor:
+    - name: eInk WeatherBoard Wake Times
+      unique_id: eink_weatherboard_wake_times
+      state: "{{ this.attributes.next_wake_time | default('Not Available') }}"
+      attributes:
+        wake_times: "{{ waketime[2] | default('Not Available') }}"
+        next_wake_time: "{{ waketime[0] | default(999999) }}"
+        wake_time_helper: "{{ waketime[1] | default('Not Available') }}"
