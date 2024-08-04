@@ -105,7 +105,7 @@
             {{ cond_now }}
           {%- endif %}
         weather_hourly_condition_0: >
-          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+          {%- if 'hourly_intervals' not in this.attributes %}
             {%- set hourlytime = (default_0 | int) %}
           {%- else %}
             {%- set hourlytime = ((this.attributes.hourly_intervals[0] | default(default_0)) | int) %}
@@ -120,21 +120,21 @@
             {{ cond0 }}
           {%- endif %}
         weather_hourly_temperature_0: >
-          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+          {%- if 'hourly_intervals' not in this.attributes %}
             {%- set hourlytime = (default_0 | int) %}
           {%- else %}
             {%- set hourlytime = ((this.attributes.hourly_intervals[0] | default(default_0)) | int) %}
           {%- endif %}
           {{ hourly["weather.openweathermap"].forecast[hourlytime].temperature | round }}
         weather_hourly_timestamp_0: >
-          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+          {%- if 'hourly_intervals' not in this.attributes %}
             {%- set hourlytime = (default_0 | int) %}
           {%- else %}
             {%- set hourlytime = ((this.attributes.hourly_intervals[0] | default(default_0)) | int) %}
           {%- endif %}
           {%- set timestamp = as_timestamp(hourly["weather.openweathermap"].forecast[hourlytime].datetime) | timestamp_custom(time_format) %} {{ timestamp.lstrip(strip_zero) }}
         weather_hourly_condition_1: >
-          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+          {%- if 'hourly_intervals' not in this.attributes %}
             {%- set hourlytime = (default_1 | int) %}
           {%- else %}
             {%- set hourlytime = ((this.attributes.hourly_intervals[1] | default(default_1)) | int) %}
@@ -149,21 +149,21 @@
             {{ cond0 }}
           {%- endif %}
         weather_hourly_temperature_1: >
-          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+          {%- if 'hourly_intervals' not in this.attributes %}
             {%- set hourlytime = (default_1 | int) %}
           {%- else %}
             {%- set hourlytime = ((this.attributes.hourly_intervals[1] | default(default_1)) | int) %}
           {%- endif %}
           {{ hourly["weather.openweathermap"].forecast[hourlytime].temperature | round }}
         weather_hourly_timestamp_1: >
-          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+          {%- if 'hourly_intervals' not in this.attributes %}
             {%- set hourlytime = (default_1 | int) %}
           {%- else %}
             {%- set hourlytime = ((this.attributes.hourly_intervals[1] | default(default_1)) | int) %}
           {%- endif %}
           {%- set timestamp = as_timestamp(hourly["weather.openweathermap"].forecast[hourlytime].datetime) | timestamp_custom(time_format) %} {{ timestamp.lstrip(strip_zero) }}
         weather_hourly_condition_2: >
-          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+          {%- if 'hourly_intervals' not in this.attributes %}
             {%- set hourlytime = (default_2 | int) %}
           {%- else %}
             {%- set hourlytime = ((this.attributes.hourly_intervals[2] | default(default_2)) | int) %}
@@ -178,21 +178,21 @@
             {{ cond0 }}
           {%- endif %}
         weather_hourly_temperature_2: >
-          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+          {%- if 'hourly_intervals' not in this.attributes %}
             {%- set hourlytime = (default_2 | int) %}
           {%- else %}
             {%- set hourlytime = ((this.attributes.hourly_intervals[2] | default(default_2)) | int) %}
           {%- endif %}
           {{ hourly["weather.openweathermap"].forecast[hourlytime].temperature | round }}
         weather_hourly_timestamp_2: >
-          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+          {%- if 'hourly_intervals' not in this.attributes %}
             {%- set hourlytime = (default_2 | int) %}
           {%- else %}
             {%- set hourlytime = ((this.attributes.hourly_intervals[2] | default(default_2)) | int) %}
           {%- endif %}
           {%- set timestamp = as_timestamp(hourly["weather.openweathermap"].forecast[hourlytime].datetime) | timestamp_custom(time_format) %} {{ timestamp.lstrip(strip_zero) }}
         weather_hourly_condition_3: >
-          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+          {%- if 'hourly_intervals' not in this.attributes %}
             {%- set hourlytime = (default_3 | int) %}
           {%- else %}
             {%- set hourlytime = ((this.attributes.hourly_intervals[3] | default(default_3)) | int) %}
@@ -207,14 +207,14 @@
             {{ cond0 }}
           {%- endif %}
         weather_hourly_temperature_3: >
-          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+          {%- if 'hourly_intervals' not in this.attributes %}
             {%- set hourlytime = (default_3 | int) %}
           {%- else %}
             {%- set hourlytime = ((this.attributes.hourly_intervals[3] | default(default_3)) | int) %}
           {%- endif %}
           {{ hourly["weather.openweathermap"].forecast[hourlytime].temperature | round }}
         weather_hourly_timestamp_3: >
-          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+          {%- if 'hourly_intervals' not in this.attributes %}
             {%- set hourlytime = (default_3 | int) %}
           {%- else %}
             {%- set hourlytime = ((this.attributes.hourly_intervals[3] | default(default_3)) | int) %}
