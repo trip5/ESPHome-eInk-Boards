@@ -22,11 +22,15 @@ Anything in `configuration.yaml` under the `template:` heading must now be moved
 
 My Weatherboard code if heavily derived from Madelena Mak's [Weatherman Dashboard](https://github.com/Madelena/esphome-weatherman-dashboard) and even more so from Stephan Wijman's updates on his [blog](https://blog.wijman.net/e-ink-weather-frame-with-esphome-and-home-assistant/).  Big thanks to both.
 
-This relies on the OpenWeatherMap integration to function.  In its unedited form, requires 2 services: `openweathermap` (onecall_daily) and `openweathermap_hourly` (onecall_hourly). Read more about that [here](https://www.home-assistant.io/integrations/openweathermap). You may need to use 2 different locations (just make it slightly different).
+This relies on the OpenWeatherMap integration to function.  In its unedited form, requires 1 service: `openweathermap` (it seems `onecall_daily` and `onecall_hourly` are not relevant anymore). Read more about that [here](https://www.home-assistant.io/integrations/openweathermap).
 
-My YAML uses 2-hour increments to the hourly forecast.  Look for the [0], [2], [4], [6] patterns in the code if you wish to adjust this.  There are also notes in the code about how to change the datestamp if you don't prefer the formats I use.  Other than those 2 points, there should not be much editing of the code to make it functional.  Except, of course, for the waketimes.  See the notes below and in the yaml.
+The simple YAML uses 2-hour increments to the hourly forecast but this is adjustable by variables.  There are also notes in the code about how to change the datestamp if you don't prefer the formats I use.  Other than those 2 points, there should not be much editing of the code to make it functional.  Except, of course, for the waketimes.  See the notes below and in the yaml.
 
 [`HomeAssistant_template_weather.yaml`](HomeAssistant_template_weather.yaml)
+
+The dynamic YAML can use any times ahead of the current time (ie after midnight you can display hourly weather for 6 am, 9 am, noon, and 3 pm).  You may want to edit the times.
+
+[`HomeAssistant_template_weather_dynamic.yaml`](HomeAssistant_template_weather.yaml)
 
 #### TasksBoard
 
@@ -121,9 +125,9 @@ Here's how to open the connector: lift up the darker lever with your fingernail 
 
 This board is used to allow the ESP32 to monitor the battery power as well as make disconnecting the ESP32 Board and battery easy.
 
-The board allows battery monitoring by connecting  a 33K resistor between the 5V input pin and the ADC pin (GPIO34) and then a 100K resistor from ADC to ground.  I also added a 1000uF capacitor between the 5V pin and ground. This seems to help ESP32s that may have trouble booting from a sagging battery.  And of course, battery connections to the 5V input pin and ground.
+The board allows battery monitoring by connecting a 33K resistor between the 5V input pin and the ADC pin (GPIO34) and then a 100K resistor from ADC to ground.  I also added a 1000uF capacitor between the 5V pin and ground. This seems to help ESP32s that may have trouble booting from a sagging battery.  And of course, battery connections to the 5V input pin and ground.
 
-The sockets are extras included with D1 Minis but I'm sure any sockets that have a 2.54 pitch will work fine.  I also pulled out every pin next to a used pin in the sockets, mostly because on my first attempt, I shorted 5V to CMD which resulted in the board not booting.  I left about 4/8 pins intact for stability.
+The sockets are extras included with D1 Minis but I'm sure any sockets that have a 2.54 pitch will work fine.  I also pulled out every pin next to a used pin in the sockets, mostly because on my first attempt, I shorted 5V to CMD which resulted in the board not booting.  I left about 4 of 8 pins intact for stability.
 
 A lot of the connections are made under the board by using the legs of the resistors and capacitors to meet the ends of the socket pins (which were then clipped and soldered to make them roundish).  I used half of a resistor leg to hold the battery connector lead in place.
 
@@ -158,14 +162,21 @@ The power board should fit about here.
 
 ![image](./images/build3.jpg)
 
-Here's where everything finally comes together.  The lace-pattern of the paracord shows a place to put in that big 10000mAh battery as well as the velcro I use to hold the ribbon cable down.  You could use masking tape to hold down the cable, too.  I'm pretty happy with how the battery is held in place but I'm still trying to figure out if this is the best way to hang it to the wall.  There's a clear shot of the "showlace tightener" I use to pull the paracord tight.
-
+Here's where everything finally comes together.  The triangle shape of the paracord holds that big 10000mAh battery in place pretty well.
+There's a clear shot of the "showlace tightener" I use to pull the paracord tight.
 Also you can see a white bit cut out of what used to be the spacer at the front of the frame.  This allows that bit to protect the battery from the screw heads and also the ability to take everything apart without removing the D-rings.
+
+![image](./images/build4.jpg)
+
+Later... I ended up using epoxy glue on velcro because sticky velcro tape doesn't stick to MDF board well (and super glue just soaks into the MDF).
+You could use masking tape to hold down the cable, too. I also ended up using picture hanging wire twisted tight around the top 2 D-rings. It's secure enough.
+
 
 ## Update History
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
+| 2024.08.04 | Added the dynamic Home Assistant Template, added variables to both |
 | 2024.07.14 | Fixes to ESPHome OTA & how sensors reported to HA |
 | 2024.05.25 | First release    |
 

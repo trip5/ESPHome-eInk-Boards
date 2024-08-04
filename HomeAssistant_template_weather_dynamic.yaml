@@ -1,0 +1,246 @@
+# Dynamic WeatherBoard
+- trigger:
+    - platform: time_pattern
+      minutes: /5
+      variables:
+        hourlytimes: >
+          {# Edit and order the schedule from midnight 00:00 to 23:00 as needed - 1st handles from midnight to a certain AM time and the last will handle all others not in the if/elif's #}
+          {# You MUST use leading zeros on all time comparisons #}
+          {# Because of the way Home Assistant updates sensors, it can take up to 2 time pattern cycles to fully update, so it's best to set the check times = waketimes - a few time_patterns #}
+          {# Be sure all of your hourlytimes end in :00 unless you live in a "weird" time zone that uses +/- 30 minutes then you probably have to end all hourlytimes with :30  #}
+          {# Do an hourly service call in Home Assistant Developer tools with openweathermap/hourly and you can see why this is important #}
+          {%- set hourlytimes = [] %}
+          {%- if now().strftime('%H.%M') < '06.45' %} {# for waketime 06:05 #}
+            {%- set hourlytimes = hourlytimes + ["09:00"] %}
+            {%- set hourlytimes = hourlytimes + ["12:00"] %}
+            {%- set hourlytimes = hourlytimes + ["15:00"] %}
+            {%- set hourlytimes = hourlytimes + ["18:00"] %}
+          {%- elif now().strftime('%H.%M') < '08.45' %} {# for waketime 08:05 #}
+            {%- set hourlytimes = hourlytimes + ["10:00"] %}
+            {%- set hourlytimes = hourlytimes + ["14:00"] %}
+            {%- set hourlytimes = hourlytimes + ["16:00"] %}
+            {%- set hourlytimes = hourlytimes + ["20:00"] %}
+          {%- elif now().strftime('%H.%M') < '10.45' %} {# for waketime 10:05 #}
+            {%- set hourlytimes = hourlytimes + ["12:00"] %}
+            {%- set hourlytimes = hourlytimes + ["15:00"] %}
+            {%- set hourlytimes = hourlytimes + ["18:00"] %}
+            {%- set hourlytimes = hourlytimes + ["21:00"] %}
+          {%- elif now().strftime('%H.%M') < '12.45' %} {# for waketime 12:05 #}
+            {%- set hourlytimes = hourlytimes + ["14:00"] %}
+            {%- set hourlytimes = hourlytimes + ["16:00"] %}
+            {%- set hourlytimes = hourlytimes + ["19:00"] %}
+            {%- set hourlytimes = hourlytimes + ["22:00"] %}
+          {%- elif now().strftime('%H.%M') < '14.45' %} {# for waketime 14:05 #}
+            {%- set hourlytimes = hourlytimes + ["16:00"] %}
+            {%- set hourlytimes = hourlytimes + ["18:00"] %}
+            {%- set hourlytimes = hourlytimes + ["20:00"] %}
+            {%- set hourlytimes = hourlytimes + ["22:00"] %}
+          {%- elif now().strftime('%H.%M') < '16.45' %} {# for waketime 16:05 #}
+            {%- set hourlytimes = hourlytimes + ["18:00"] %}
+            {%- set hourlytimes = hourlytimes + ["20:00"] %}
+            {%- set hourlytimes = hourlytimes + ["22:00"] %}
+            {%- set hourlytimes = hourlytimes + ["00:00"] %}
+          {%- elif now().strftime('%H.%M') < '18.45' %} {# for waketime 18:05 #}
+            {%- set hourlytimes = hourlytimes + ["20:00"] %}
+            {%- set hourlytimes = hourlytimes + ["21:00"] %}
+            {%- set hourlytimes = hourlytimes + ["22:00"] %}
+            {%- set hourlytimes = hourlytimes + ["00:00"] %}
+          {%- else %} {# for waketimes after 19:00, will show next day's forecast #}
+            {%- set hourlytimes = hourlytimes + ["08:00"] %}
+            {%- set hourlytimes = hourlytimes + ["12:00"] %}
+            {%- set hourlytimes = hourlytimes + ["16:00"] %}
+            {%- set hourlytimes = hourlytimes + ["20:00"] %}
+          {%- endif %}
+          {{hourlytimes}}
+        # Here you can edit the fallback intervals in case the above fails
+        default_0: "2"
+        default_1: "4"
+        default_2: "6"
+        default_3: "8"
+        # Edit how timestamps are shown
+        time_format: "%I:00%p" # %H:00 = 24hrs (13:00) / %I:00%p = 12hrs + AM/PM (01:00PM)
+        strip_zero: "0" # 0 to strip leading zero (1:00PM), empty quotes if not
+  action:
+    - service: weather.get_forecasts
+      data:
+        type: hourly
+      target:
+        entity_id: weather.openweathermap
+      response_variable: hourly
+    - service: weather.get_forecasts
+      data:
+        type: daily
+      target:
+        entity_id: weather.openweathermap
+      response_variable: daily
+  sensor:
+    - name: eInk WeatherBoard Data
+      unique_id: eink_weatherboard_data
+      state: "OK"
+      attributes:
+        hourly_times: "{{hourlytimes}}"
+        hourly_intervals: >
+          {%- set thishourly = 3 %}  {# should match what variable is the max #}
+          {%- set count = namespace(this = 0) %}
+          {%- set counter = namespace(this = 0) %}
+          {%- set hours = namespace(this = []) -%}
+          {%- for hourlycheck in hourly["weather.openweathermap"].forecast %}
+            {%- if (hourlytimes[count.this]|string + ":00") in (as_datetime(hourlycheck.datetime).astimezone()|string) %}
+              {%- set count.this = count.this + 1 %}
+              {%- set hours.this = hours.this + [counter.this] %}
+              {%- if count.this == 1 + thishourly %}
+                {%- break %}
+              {%- endif %}
+            {%- endif %}
+            {%- set counter.this = counter.this + 1 %}
+          {%- endfor %}
+          {{hours.this}}
+        weather_now_temperature: >
+          {{ hourly["weather.openweathermap"].forecast[0].temperature | round }}
+        weather_now_condition: >
+          {%- set cond_now = hourly["weather.openweathermap"].forecast[0].condition %}
+          {%- if states('sun.sun') == 'below_horizon' %}
+            {%- if cond_now == 'sunny' %} night {% elif cond_now == 'partlycloudy' %} night-partly-cloudy {% else %} {{ cond_now }} {% endif %}
+          {%- else %}
+            {{ cond_now }}
+          {%- endif %}
+        weather_hourly_condition_0: >
+          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+            {%- set hourlytime = (default_0 | int) %}
+          {%- else %}
+            {%- set hourlytime = ((this.attributes.hourly_intervals[0] | default(default_0)) | int) %}
+          {%- endif %}
+          {%- set cond0 = hourly["weather.openweathermap"].forecast[hourlytime].condition %}
+          {%- set next_setting = as_timestamp(state_attr('sun.sun', 'next_setting')) %}
+          {%- set next_rising = as_timestamp(state_attr('sun.sun', 'next_rising')) %}
+          {%- set cond0_time = as_timestamp(hourly["weather.openweathermap"].forecast[hourlytime].datetime) %}
+          {%- if cond0_time > next_setting and cond0_time < next_rising %}
+            {%- if cond0 == 'sunny' %} night {% elif cond0 == 'partlycloudy' %} night-partly-cloudy {% else %} {{ cond0 }} {% endif %}
+          {%- else %}
+            {{ cond0 }}
+          {%- endif %}
+        weather_hourly_temperature_0: >
+          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+            {%- set hourlytime = (default_0 | int) %}
+          {%- else %}
+            {%- set hourlytime = ((this.attributes.hourly_intervals[0] | default(default_0)) | int) %}
+          {%- endif %}
+          {{ hourly["weather.openweathermap"].forecast[hourlytime].temperature | round }}
+        weather_hourly_timestamp_0: >
+          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+            {%- set hourlytime = (default_0 | int) %}
+          {%- else %}
+            {%- set hourlytime = ((this.attributes.hourly_intervals[0] | default(default_0)) | int) %}
+          {%- endif %}
+          {%- set timestamp = as_timestamp(hourly["weather.openweathermap"].forecast[hourlytime].datetime) | timestamp_custom(time_format) %} {{ timestamp.lstrip(strip_zero) }}
+        weather_hourly_condition_1: >
+          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+            {%- set hourlytime = (default_1 | int) %}
+          {%- else %}
+            {%- set hourlytime = ((this.attributes.hourly_intervals[1] | default(default_1)) | int) %}
+          {%- endif %}
+          {%- set cond0 = hourly["weather.openweathermap"].forecast[hourlytime].condition %}
+          {%- set next_setting = as_timestamp(state_attr('sun.sun', 'next_setting')) %}
+          {%- set next_rising = as_timestamp(state_attr('sun.sun', 'next_rising')) %}
+          {%- set cond0_time = as_timestamp(hourly["weather.openweathermap"].forecast[hourlytime].datetime) %}
+          {%- if cond0_time > next_setting and cond0_time < next_rising %}
+            {%- if cond0 == 'sunny' %} night {% elif cond0 == 'partlycloudy' %} night-partly-cloudy {% else %} {{ cond0 }} {% endif %}
+          {%- else %}
+            {{ cond0 }}
+          {%- endif %}
+        weather_hourly_temperature_1: >
+          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+            {%- set hourlytime = (default_1 | int) %}
+          {%- else %}
+            {%- set hourlytime = ((this.attributes.hourly_intervals[1] | default(default_1)) | int) %}
+          {%- endif %}
+          {{ hourly["weather.openweathermap"].forecast[hourlytime].temperature | round }}
+        weather_hourly_timestamp_1: >
+          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+            {%- set hourlytime = (default_1 | int) %}
+          {%- else %}
+            {%- set hourlytime = ((this.attributes.hourly_intervals[1] | default(default_1)) | int) %}
+          {%- endif %}
+          {%- set timestamp = as_timestamp(hourly["weather.openweathermap"].forecast[hourlytime].datetime) | timestamp_custom(time_format) %} {{ timestamp.lstrip(strip_zero) }}
+        weather_hourly_condition_2: >
+          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+            {%- set hourlytime = (default_2 | int) %}
+          {%- else %}
+            {%- set hourlytime = ((this.attributes.hourly_intervals[2] | default(default_2)) | int) %}
+          {%- endif %}
+          {%- set cond0 = hourly["weather.openweathermap"].forecast[hourlytime].condition %}
+          {%- set next_setting = as_timestamp(state_attr('sun.sun', 'next_setting')) %}
+          {%- set next_rising = as_timestamp(state_attr('sun.sun', 'next_rising')) %}
+          {%- set cond0_time = as_timestamp(hourly["weather.openweathermap"].forecast[hourlytime].datetime) %}
+          {%- if cond0_time > next_setting and cond0_time < next_rising %}
+            {%- if cond0 == 'sunny' %} night {% elif cond0 == 'partlycloudy' %} night-partly-cloudy {% else %} {{ cond0 }} {% endif %}
+          {%- else %}
+            {{ cond0 }}
+          {%- endif %}
+        weather_hourly_temperature_2: >
+          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+            {%- set hourlytime = (default_2 | int) %}
+          {%- else %}
+            {%- set hourlytime = ((this.attributes.hourly_intervals[2] | default(default_2)) | int) %}
+          {%- endif %}
+          {{ hourly["weather.openweathermap"].forecast[hourlytime].temperature | round }}
+        weather_hourly_timestamp_2: >
+          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+            {%- set hourlytime = (default_2 | int) %}
+          {%- else %}
+            {%- set hourlytime = ((this.attributes.hourly_intervals[2] | default(default_2)) | int) %}
+          {%- endif %}
+          {%- set timestamp = as_timestamp(hourly["weather.openweathermap"].forecast[hourlytime].datetime) | timestamp_custom(time_format) %} {{ timestamp.lstrip(strip_zero) }}
+        weather_hourly_condition_3: >
+          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+            {%- set hourlytime = (default_3 | int) %}
+          {%- else %}
+            {%- set hourlytime = ((this.attributes.hourly_intervals[3] | default(default_3)) | int) %}
+          {%- endif %}
+          {%- set cond0 = hourly["weather.openweathermap"].forecast[hourlytime].condition %}
+          {%- set next_setting = as_timestamp(state_attr('sun.sun', 'next_setting')) %}
+          {%- set next_rising = as_timestamp(state_attr('sun.sun', 'next_rising')) %}
+          {%- set cond0_time = as_timestamp(hourly["weather.openweathermap"].forecast[hourlytime].datetime) %}
+          {%- if cond0_time > next_setting and cond0_time < next_rising %}
+            {%- if cond0 == 'sunny' %} night {% elif cond0 == 'partlycloudy' %} night-partly-cloudy {% else %} {{ cond0 }} {% endif %}
+          {%- else %}
+            {{ cond0 }}
+          {%- endif %}
+        weather_hourly_temperature_3: >
+          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+            {%- set hourlytime = (default_3 | int) %}
+          {%- else %}
+            {%- set hourlytime = ((this.attributes.hourly_intervals[3] | default(default_3)) | int) %}
+          {%- endif %}
+          {{ hourly["weather.openweathermap"].forecast[hourlytime].temperature | round }}
+        weather_hourly_timestamp_3: >
+          {%- if this.attributes.hourly_intervals not in ['unavailable', 'unknown', 'none', 'null'] %}
+            {%- set hourlytime = (default_3 | int) %}
+          {%- else %}
+            {%- set hourlytime = ((this.attributes.hourly_intervals[3] | default(default_3)) | int) %}
+          {%- endif %}
+          {%- set timestamp = as_timestamp(hourly["weather.openweathermap"].forecast[hourlytime].datetime) | timestamp_custom(time_format) %} {{ timestamp.lstrip(strip_zero) }}
+        weather_daily_condition_0: >
+          {{ daily["weather.openweathermap"].forecast[1].condition }}
+        weather_daily_temperature_0: >
+          {{ daily["weather.openweathermap"].forecast[1].temperature | round }}
+        weather_daily_timestamp_0: >
+          {{ as_timestamp(daily["weather.openweathermap"].forecast[1].datetime) | timestamp_custom('%a') }}
+        weather_daily_condition_1: >
+          {{ daily["weather.openweathermap"].forecast[2].condition }}
+        weather_daily_temperature_1: >
+          {{ daily["weather.openweathermap"].forecast[2].temperature | round }}
+        weather_daily_timestamp_1: >
+          {{ as_timestamp(daily["weather.openweathermap"].forecast[2].datetime) | timestamp_custom('%a') }}
+        weather_daily_condition_2: >
+          {{ daily["weather.openweathermap"].forecast[3].condition }}
+        weather_daily_temperature_2: >
+          {{ daily["weather.openweathermap"].forecast[3].temperature | round }}
+        weather_daily_timestamp_2: >
+          {{ as_timestamp(daily["weather.openweathermap"].forecast[3].datetime) | timestamp_custom('%a') }}
+        weather_daily_condition_3: >
+          {{ daily["weather.openweathermap"].forecast[4].condition }}
+        weather_daily_temperature_3: >
+          {{ daily["weather.openweathermap"].forecast[4].temperature | round }}
+        weather_daily_timestamp_3: >
+          {{ as_timestamp(daily["weather.openweathermap"].forecast[4].datetime) | timestamp_custom('%a') }}
