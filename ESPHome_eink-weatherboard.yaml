@@ -7,7 +7,7 @@ substitutions:
   friendly_name: eInk-WeatherBoard
   project_name: "Trip5.eInk-WeatherBoard"
   comment: "eInk-WeatherBoard from Trip5"
-  project_version: "2024.07.14"
+  project_version: "2024.08.09"
   time_zone: "Asia/Seoul" # Check https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
   adc_pin: GPIO34
   sleep_time: 60min # this is the default but is overridden
@@ -186,7 +186,7 @@ script:
           condition:
             lambda: 'return (id(wake_time_helper).state <= (8 * 60));'
           then:
-            - delay: !lambda 'return (((id(wake_time_helper).state) - 30) * 1000);' # lambdas should return value as ms
+            - delay: !lambda 'return (((id(wake_time_helper).state) - 30) * 1000);'
       - if:
           condition:
             lambda: 'return id(data_updated) == true;'
@@ -232,7 +232,7 @@ script:
                   lambda: 'return (id(wake_time_helper).state >= (6 * 60));'
             - deep_sleep.enter:
                 id: deep_sleep_control
-                sleep_duration: !lambda return id(wake_time_helper).state * 1000; # lambdas should return value as ms
+                sleep_duration: !lambda return id(wake_time_helper).state * 1000;   #lambdas should return value as ms
       - delay: 60s
       - script.execute: deep_sleep_evaluation
   - id: deep_sleep_disabled_check_refresh_time
@@ -293,7 +293,7 @@ font:
   - file: 'fonts/Gotham-Rounded-Bold.ttf'
     id: font_title
     size: 52
-    glyphs: WETH RLOADING
+    glyphs: WEATHR
   - file: 'fonts/Gotham-Rounded-Bold.ttf'
     id: font_now_temp
     size: 104
@@ -302,7 +302,7 @@ font:
     id: font_small_title
     size: 30
     glyphs:  |
-      TODAY ULK
+      TODAY MRWULK
   - file: 'fonts/Gotham-Rounded-Medium.ttf'
     id: font_today_time
     size: 20
@@ -619,6 +619,28 @@ text_sensor:
     on_value:
       then:
          - lambda: 'id(data_updated) = true;'
+  # Get custom titles from sensor too!
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_now_title
+    id: weather_now_title
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_hourly_title
+    id: weather_hourly_title
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
+  - platform: homeassistant
+    entity_id: '${ha_weather_data}'
+    attribute: weather_daily_title
+    id: weather_daily_title
+    on_value:
+      then:
+         - lambda: 'id(data_updated) = true;'
 
 # Now render everything on the ePaper screen.
 display:
@@ -689,12 +711,12 @@ display:
       // it.rectangle(80, 80, 320, 640);
 
       // CURRENT WEATHER
-      it.printf(240, 84, id(font_title), color_red, TextAlign::TOP_CENTER, "WEATHER");
+      it.printf(240, 84, id(font_title), color_red, TextAlign::TOP_CENTER, id(weather_now_title).state.c_str());
       it.printf(100, 158, id(font_mdi_large), color_blk, TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_now_condition).state.c_str()].c_str());
       it.printf(300, 158, id(font_now_temp), color_blk, TextAlign::TOP_CENTER, "%2.0f°C", id(weather_now_temperature).state);
 
       // HOURLY
-      it.printf(240, 280, id(font_small_title), color_red, TextAlign::TOP_CENTER, "TODAY");
+      it.printf(240, 280, id(font_small_title), color_red, TextAlign::TOP_CENTER, id(weather_hourly_title).state.c_str());
 
       it.printf(90, 325, id(font_today_time), color_blk, TextAlign::TOP_CENTER, "%s", id(weather_hourly_timestamp_0).state.c_str());
       it.printf(90, 350, id(font_mdi_small), color_blk, TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_hourly_condition_0).state.c_str()].c_str());
@@ -713,7 +735,7 @@ display:
       it.printf(390, 420, id(font_today_temp), color_blk, TextAlign::TOP_CENTER, "%2.0f°C", id(weather_hourly_temperature_3).state);
 
       // NEXT 3 DAYS
-      it.printf(240, 480, id(font_small_title), color_red, TextAlign::TOP_CENTER, "OUTLOOK");
+      it.printf(240, 480, id(font_small_title), color_red, TextAlign::TOP_CENTER, id(weather_daily_title).state.c_str());
 
       it.printf(120, 520, id(font_outlook_day), color_blk, TextAlign::TOP_CENTER, "%s", id(weather_daily_timestamp_0).state.c_str());
       it.printf(120, 550, id(font_mdi_large), color_blk, TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_daily_condition_0).state.c_str()].c_str());

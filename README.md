@@ -28,9 +28,11 @@ The simple YAML uses 2-hour increments to the hourly forecast but this is adjust
 
 [`HomeAssistant_template_weather.yaml`](HomeAssistant_template_weather.yaml)
 
-The dynamic YAML can use any times ahead of the current time (ie after midnight you can display hourly weather for 6 am, 9 am, noon, and 3 pm).  You may want to edit the times.
+The dynamic YAML can use any times ahead of the current time (ie after midnight until 6am you can display hourly weather for 9 am, 12 noon, 3 pm, and 6pm).  You may want to edit the times. Which days shown for the daily forecast are also dynamic.
 
 [`HomeAssistant_template_weather_dynamic.yaml`](HomeAssistant_template_weather.yaml)
+
+Please note that in both versions, titles are now editable. Be sure your ESPHome YAML the characters you use are defined in the fonts section.
 
 #### TasksBoard
 
@@ -176,7 +178,8 @@ You could use masking tape to hold down the cable, too. I also ended up using pi
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
-| 2024.08.04 | Added the dynamic Home Assistant Template, added variables to both |
+| 2024.08.10 | Titles & daily forecast now possible to be dynamic |
+| 2024.08.04 | Added the dynamic Home Assistant Weatherboard Template, added variables to both |
 | 2024.07.14 | Fixes to ESPHome OTA & how sensors reported to HA |
 | 2024.05.25 | First release    |
 

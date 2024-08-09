@@ -5,42 +5,42 @@
       variables:
         hourlytimes: >
           {# Edit and order the schedule from midnight 00:00 to 23:00 as needed - 1st handles from midnight to a certain AM time and the last will handle all others not in the if/elif's #}
-          {# You MUST use leading zeros on all time comparisons #}
-          {# Because of the way Home Assistant updates sensors, it can take up to 2 time pattern cycles to fully update, so it's best to set the check times = waketimes - a few time_patterns #}
+          {# You MUST use leading zeros on all time comparisons for 9am and earlier - results will be unpredictable if you forget to do this #}
+          {# Because of the way Home Assistant updates sensors, it can take up to 2 time pattern cycles to fully update #}
           {# Be sure all of your hourlytimes end in :00 unless you live in a "weird" time zone that uses +/- 30 minutes then you probably have to end all hourlytimes with :30  #}
-          {# Do an hourly service call in Home Assistant Developer tools with openweathermap/hourly and you can see why this is important #}
+          {# Do an service call in Home Assistant Developer tools with openweathermap/hourly and you can see why this is important #}
           {%- set hourlytimes = [] %}
-          {%- if now().strftime('%H.%M') < '06.45' %} {# for waketime 06:05 #}
+          {%- if now().strftime('%H.%M') < '06.10' %} {# for waketime 06:05 #}
             {%- set hourlytimes = hourlytimes + ["09:00"] %}
             {%- set hourlytimes = hourlytimes + ["12:00"] %}
             {%- set hourlytimes = hourlytimes + ["15:00"] %}
             {%- set hourlytimes = hourlytimes + ["18:00"] %}
-          {%- elif now().strftime('%H.%M') < '08.45' %} {# for waketime 08:05 #}
+          {%- elif now().strftime('%H.%M') < '08.10' %} {# for waketime 08:05 #}
             {%- set hourlytimes = hourlytimes + ["10:00"] %}
             {%- set hourlytimes = hourlytimes + ["14:00"] %}
             {%- set hourlytimes = hourlytimes + ["16:00"] %}
             {%- set hourlytimes = hourlytimes + ["20:00"] %}
-          {%- elif now().strftime('%H.%M') < '10.45' %} {# for waketime 10:05 #}
+          {%- elif now().strftime('%H.%M') < '10.10' %} {# for waketime 10:05 #}
             {%- set hourlytimes = hourlytimes + ["12:00"] %}
             {%- set hourlytimes = hourlytimes + ["15:00"] %}
             {%- set hourlytimes = hourlytimes + ["18:00"] %}
             {%- set hourlytimes = hourlytimes + ["21:00"] %}
-          {%- elif now().strftime('%H.%M') < '12.45' %} {# for waketime 12:05 #}
+          {%- elif now().strftime('%H.%M') < '12.10' %} {# for waketime 12:05 #}
             {%- set hourlytimes = hourlytimes + ["14:00"] %}
             {%- set hourlytimes = hourlytimes + ["16:00"] %}
             {%- set hourlytimes = hourlytimes + ["19:00"] %}
             {%- set hourlytimes = hourlytimes + ["22:00"] %}
-          {%- elif now().strftime('%H.%M') < '14.45' %} {# for waketime 14:05 #}
+          {%- elif now().strftime('%H.%M') < '14.10' %} {# for waketime 14:05 #}
             {%- set hourlytimes = hourlytimes + ["16:00"] %}
             {%- set hourlytimes = hourlytimes + ["18:00"] %}
             {%- set hourlytimes = hourlytimes + ["20:00"] %}
             {%- set hourlytimes = hourlytimes + ["22:00"] %}
-          {%- elif now().strftime('%H.%M') < '16.45' %} {# for waketime 16:05 #}
+          {%- elif now().strftime('%H.%M') < '16.10' %} {# for waketime 16:05 #}
             {%- set hourlytimes = hourlytimes + ["18:00"] %}
             {%- set hourlytimes = hourlytimes + ["20:00"] %}
             {%- set hourlytimes = hourlytimes + ["22:00"] %}
             {%- set hourlytimes = hourlytimes + ["00:00"] %}
-          {%- elif now().strftime('%H.%M') < '18.45' %} {# for waketime 18:05 #}
+          {%- elif now().strftime('%H.%M') < '18.10' %} {# for waketime 18:05 #}
             {%- set hourlytimes = hourlytimes + ["20:00"] %}
             {%- set hourlytimes = hourlytimes + ["21:00"] %}
             {%- set hourlytimes = hourlytimes + ["22:00"] %}
@@ -57,6 +57,36 @@
         default_1: "4"
         default_2: "6"
         default_3: "8"
+        titles: >
+          {# Similar as above but basically make sure it handles the hourly report shows a different title #}
+          {# Handle it in the order of the 3 titles (WEATHER, TODAY, OUTLOOK are defaults #}
+          {# Be sure the font in your ESPHome YAML can handle the characters! ie. "WEATHR" for font_title and "TODAY MRWULK" for the font_small_title #}
+          {%- set titles = [] %}
+          {%- set titles = titles + ["WEATHER"] %}
+          {%- if now().strftime('%H.%M') < '00.10' %} {# for waketime 00:05 (it's TOMORROW until the sun rises #}
+            {%- set titles = titles + ["TOMORROW"] %}
+          {%- elif now().strftime('%H.%M') < '18.10' %} {# for waketimes 06:05 to 18:05 #}
+            {%- set titles = titles + ["TODAY"] %}
+          {%- else %} {# for waketimes after 18:10, will show next day's forecast #}
+            {%- set titles = titles + ["TOMORROW"] %}
+          {%- endif %}
+          {%- set titles = titles + ["OUTLOOK"] %}
+          {{titles}}
+        dailydays: >
+          {# Similar as above but handles the daily forecast/outlook (it doesn't need to show tomorrow when that's handled by the hourly #}
+          {%- set dailydays = [] %}
+          {%- if now().strftime('%H.%M') < '00.10' %} {# for waketime 00:05 (kludge fix: service still contains this day's daily forecast as tomorrow's) #}
+            {%- set dailydays = [2,3,4,5] %}
+          {%- elif now().strftime('%H.%M') < '18.10' %} {# for waketimes 06:05 to 18:05 #}
+            {%- set dailydays = [1,2,3,4] %}
+          {%- else %} {# for waketimes after 18:10, will skip showing tomorrow's forecast  #}
+            {%- set dailydays = [2,3,4,5] %}
+          {%- endif %}
+          {{dailydays}}
+        daily_0: "{{ dailydays[0]|int }}"
+        daily_1: "{{ dailydays[1]|int }}"
+        daily_2: "{{ dailydays[2]|int }}"
+        daily_3: "{{ dailydays[3]|int }}"
         # Edit how timestamps are shown
         time_format: "%I:00%p" # %H:00 = 24hrs (13:00) / %I:00%p = 12hrs + AM/PM (01:00PM)
         strip_zero: "0" # 0 to strip leading zero (1:00PM), empty quotes if not
@@ -95,6 +125,7 @@
             {%- set counter.this = counter.this + 1 %}
           {%- endfor %}
           {{hours.this}}
+        weather_now_title: "{{ titles[0] }}"
         weather_now_temperature: >
           {{ hourly["weather.openweathermap"].forecast[0].temperature | round }}
         weather_now_condition: >
@@ -104,6 +135,7 @@
           {%- else %}
             {{ cond_now }}
           {%- endif %}
+        weather_hourly_title: "{{ titles[1] }}"
         weather_hourly_condition_0: >
           {%- if 'hourly_intervals' not in this.attributes %}
             {%- set hourlytime = (default_0 | int) %}
@@ -220,30 +252,31 @@
             {%- set hourlytime = ((this.attributes.hourly_intervals[3] | default(default_3)) | int) %}
           {%- endif %}
           {%- set timestamp = as_timestamp(hourly["weather.openweathermap"].forecast[hourlytime].datetime) | timestamp_custom(time_format) %} {{ timestamp.lstrip(strip_zero) }}
+        weather_daily_title: "{{ titles[2] }}"
         weather_daily_condition_0: >
-          {{ daily["weather.openweathermap"].forecast[1].condition }}
+          {{ daily["weather.openweathermap"].forecast[daily_0].condition }}
         weather_daily_temperature_0: >
-          {{ daily["weather.openweathermap"].forecast[1].temperature | round }}
+          {{ daily["weather.openweathermap"].forecast[daily_0].temperature | round }}
         weather_daily_timestamp_0: >
-          {{ as_timestamp(daily["weather.openweathermap"].forecast[1].datetime) | timestamp_custom('%a') }}
+          {{ as_timestamp(daily["weather.openweathermap"].forecast[daily_0].datetime) | timestamp_custom('%a') }}
         weather_daily_condition_1: >
-          {{ daily["weather.openweathermap"].forecast[2].condition }}
+          {{ daily["weather.openweathermap"].forecast[daily_1].condition }}
         weather_daily_temperature_1: >
-          {{ daily["weather.openweathermap"].forecast[2].temperature | round }}
+          {{ daily["weather.openweathermap"].forecast[daily_1].temperature | round }}
         weather_daily_timestamp_1: >
-          {{ as_timestamp(daily["weather.openweathermap"].forecast[2].datetime) | timestamp_custom('%a') }}
+          {{ as_timestamp(daily["weather.openweathermap"].forecast[daily_1].datetime) | timestamp_custom('%a') }}
         weather_daily_condition_2: >
-          {{ daily["weather.openweathermap"].forecast[3].condition }}
+          {{ daily["weather.openweathermap"].forecast[daily_2].condition }}
         weather_daily_temperature_2: >
-          {{ daily["weather.openweathermap"].forecast[3].temperature | round }}
+          {{ daily["weather.openweathermap"].forecast[daily_2].temperature | round }}
         weather_daily_timestamp_2: >
-          {{ as_timestamp(daily["weather.openweathermap"].forecast[3].datetime) | timestamp_custom('%a') }}
+          {{ as_timestamp(daily["weather.openweathermap"].forecast[daily_2].datetime) | timestamp_custom('%a') }}
         weather_daily_condition_3: >
-          {{ daily["weather.openweathermap"].forecast[4].condition }}
+          {{ daily["weather.openweathermap"].forecast[daily_3].condition }}
         weather_daily_temperature_3: >
-          {{ daily["weather.openweathermap"].forecast[4].temperature | round }}
+          {{ daily["weather.openweathermap"].forecast[daily_3].temperature | round }}
         weather_daily_timestamp_3: >
-          {{ as_timestamp(daily["weather.openweathermap"].forecast[4].datetime) | timestamp_custom('%a') }}
+          {{ as_timestamp(daily["weather.openweathermap"].forecast[daily_3].datetime) | timestamp_custom('%a') }}
 
 - trigger:
     - platform: time_pattern

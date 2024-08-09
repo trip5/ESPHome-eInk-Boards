@@ -9,6 +9,18 @@
         increment_1: "4"
         increment_2: "6"
         increment_3: "8"
+        # Here you can edit the 3 titles: Handle it in the order of the 3 titles (WEATHER, TODAY, OUTLOOK are defaults #}
+        # Be sure the font in your ESPHome YAML can handle the characters! ie. "WEATHR" for font_title and "TODAYULK" for the font_small_title #}
+        titles: >
+          {%- set titles = [] %}
+          {%- set titles = titles + ["WEATHER"] %}
+          {%- set titles = titles + ["TODAY"] %}
+          {%- set titles = titles + ["OUTLOOK"] %}
+          {{titles}}
+        daily_0: "1"
+        daily_1: "2"
+        daily_2: "3"
+        daily_3: "4"
         # Edit how timestamps are shown
         time_format: "%I:00%p" # %H:00 = 24hrs (13:00) / %I:00%p = 12hrs + AM/PM (01:00PM)
         strip_zero: "0" # 0 to strip leading zero (1:00PM), empty quotes if not
@@ -30,6 +42,7 @@
       unique_id: eink_weatherboard_data
       state: "OK"
       attributes:
+        hourly_times: "{{hourlytimes}}"
         weather_now_temperature: >
           {{ hourly["weather.openweathermap"].forecast[0].temperature | round }}
         weather_now_condition: >
@@ -39,6 +52,7 @@
           {%- else %}
             {{ cond_now }}
           {%- endif %}
+        weather_hourly_title: "{{ titles[1] }}"
         weather_hourly_condition_0: >
           {%- set cond0 = hourly["weather.openweathermap"].forecast[increment_0].condition %}
           {%- set next_setting = as_timestamp(state_attr('sun.sun', 'next_setting')) %}
@@ -91,34 +105,31 @@
           {%- else %}
             {{ cond0 }}
           {%- endif %}
-        weather_hourly_temperature_3: >
-          {{ hourly["weather.openweathermap"].forecast[increment_3].temperature | round }}
-        weather_hourly_timestamp_3: >
-          {%- set timestamp = as_timestamp(hourly["weather.openweathermap"].forecast[increment_3].datetime) | timestamp_custom(time_format) %} {{ timestamp.lstrip(strip_zero) }}
+        weather_daily_title: "{{ titles[2] }}"
         weather_daily_condition_0: >
-          {{ daily["weather.openweathermap"].forecast[1].condition }}
+          {{ daily["weather.openweathermap"].forecast[daily_0].condition }}
         weather_daily_temperature_0: >
-          {{ daily["weather.openweathermap"].forecast[1].temperature | round }}
+          {{ daily["weather.openweathermap"].forecast[daily_0].temperature | round }}
         weather_daily_timestamp_0: >
-          {{ as_timestamp(daily["weather.openweathermap"].forecast[1].datetime) | timestamp_custom('%a') }}
+          {{ as_timestamp(daily["weather.openweathermap"].forecast[daily_0].datetime) | timestamp_custom('%a') }}
         weather_daily_condition_1: >
-          {{ daily["weather.openweathermap"].forecast[2].condition }}
+          {{ daily["weather.openweathermap"].forecast[daily_1].condition }}
         weather_daily_temperature_1: >
-          {{ daily["weather.openweathermap"].forecast[2].temperature | round }}
+          {{ daily["weather.openweathermap"].forecast[daily_1].temperature | round }}
         weather_daily_timestamp_1: >
-          {{ as_timestamp(daily["weather.openweathermap"].forecast[2].datetime) | timestamp_custom('%a') }}
+          {{ as_timestamp(daily["weather.openweathermap"].forecast[daily_1].datetime) | timestamp_custom('%a') }}
         weather_daily_condition_2: >
-          {{ daily["weather.openweathermap"].forecast[3].condition }}
+          {{ daily["weather.openweathermap"].forecast[daily_2].condition }}
         weather_daily_temperature_2: >
-          {{ daily["weather.openweathermap"].forecast[3].temperature | round }}
+          {{ daily["weather.openweathermap"].forecast[daily_2].temperature | round }}
         weather_daily_timestamp_2: >
-          {{ as_timestamp(daily["weather.openweathermap"].forecast[3].datetime) | timestamp_custom('%a') }}
+          {{ as_timestamp(daily["weather.openweathermap"].forecast[daily_2].datetime) | timestamp_custom('%a') }}
         weather_daily_condition_3: >
-          {{ daily["weather.openweathermap"].forecast[4].condition }}
+          {{ daily["weather.openweathermap"].forecast[daily_3].condition }}
         weather_daily_temperature_3: >
-          {{ daily["weather.openweathermap"].forecast[4].temperature | round }}
+          {{ daily["weather.openweathermap"].forecast[daily_3].temperature | round }}
         weather_daily_timestamp_3: >
-          {{ as_timestamp(daily["weather.openweathermap"].forecast[4].datetime) | timestamp_custom('%a') }}
+          {{ as_timestamp(daily["weather.openweathermap"].forecast[daily_3].datetime) | timestamp_custom('%a') }}
 
 - trigger:
     - platform: time_pattern
