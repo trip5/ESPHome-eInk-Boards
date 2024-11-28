@@ -1,6 +1,12 @@
 - trigger:
     - platform: time_pattern
       minutes: /3
+      variables:
+        # This will be used as a filter in text sensors so that characters not present in the font will not be printed
+        # Copy and paste your list from glyphs in the fonts section of your ESPHome YAML and escape certain characters
+        # so backslash \ becomes \\ and double-quote " becomes \" but single-quote ' needs to be doubled ''
+        # Make sure your list has "[^ at the front and ]" at the end (this is a regular expression, with quotes around it)
+        allowed_characters: "[^! \"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz°]"
   action:
     - service: todo.get_items
       data:
@@ -95,101 +101,101 @@
           {%- endfor -%}
           {{list.todo | default('') }}
         today_0: >
-          {{ state_attr(this.entity_id, 'today')[0] | default('') }}
+          {{ state_attr(this.entity_id, 'today')[0] | default('') | regex_replace(allowed_characters, "") }}
         today_1: >
-          {{ state_attr(this.entity_id, 'today')[1] | default('') }}
+          {{ state_attr(this.entity_id, 'today')[1] | default('') | regex_replace(allowed_characters, "") }}
         today_2: >
-          {{ state_attr(this.entity_id, 'today')[2] | default('') }}
+          {{ state_attr(this.entity_id, 'today')[2] | default('') | regex_replace(allowed_characters, "") }}
         today_3: >
-          {{ state_attr(this.entity_id, 'today')[3] | default('') }}
+          {{ state_attr(this.entity_id, 'today')[3] | default('') | regex_replace(allowed_characters, "") }}
         today_4: >
-          {{ state_attr(this.entity_id, 'today')[4] | default('') }}
+          {{ state_attr(this.entity_id, 'today')[4] | default('') | regex_replace(allowed_characters, "") }}
         today_5: >
-          {{ state_attr(this.entity_id, 'today')[5] | default('') }}
+          {{ state_attr(this.entity_id, 'today')[5] | default('') | regex_replace(allowed_characters, "") }}
         today_6: >
-          {{ state_attr(this.entity_id, 'today')[6] | default('') }}
+          {{ state_attr(this.entity_id, 'today')[6] | default('') | regex_replace(allowed_characters, "") }}
         today_7: >
-          {{ state_attr(this.entity_id, 'today')[7] | default('') }}
+          {{ state_attr(this.entity_id, 'today')[7] | default('') | regex_replace(allowed_characters, "") }}
         today_8: >
-          {{ state_attr(this.entity_id, 'today')[8] | default('') }}
+          {{ state_attr(this.entity_id, 'today')[8] | default('') | regex_replace(allowed_characters, "") }}
         today_9: >
-          {{ state_attr(this.entity_id, 'today')[9] | default('') }}
+          {{ state_attr(this.entity_id, 'today')[9] | default('') | regex_replace(allowed_characters, "") }}
         upcoming_date_0: >
           {{ state_attr(this.entity_id, 'upcoming')[0] | default('') }}
         upcoming_item_0: >
-          {{ state_attr(this.entity_id, 'upcoming')[1] | default('') }}
+          {{ state_attr(this.entity_id, 'upcoming')[1] | default('') | regex_replace(allowed_characters, "") }}
         upcoming_date_1: >
           {{ state_attr(this.entity_id, 'upcoming')[2] | default('') }}
         upcoming_item_1: >
-          {{ state_attr(this.entity_id, 'upcoming')[3] | default('') }}
+          {{ state_attr(this.entity_id, 'upcoming')[3] | default('') | regex_replace(allowed_characters, "") }}
         upcoming_date_2: >
           {{ state_attr(this.entity_id, 'upcoming')[4] | default('') }}
         upcoming_item_2: >
-          {{ state_attr(this.entity_id, 'upcoming')[5] | default('') }}
+          {{ state_attr(this.entity_id, 'upcoming')[5] | default('') | regex_replace(allowed_characters, "") }}
         upcoming_date_3: >
           {{ state_attr(this.entity_id, 'upcoming')[6] | default('') }}
         upcoming_item_3: >
-          {{ state_attr(this.entity_id, 'upcoming')[7] | default('') }}
+          {{ state_attr(this.entity_id, 'upcoming')[7] | default('') | regex_replace(allowed_characters, "") }}
         upcoming_date_4: >
           {{ state_attr(this.entity_id, 'upcoming')[8] | default('') }}
         upcoming_item_4: >
-          {{ state_attr(this.entity_id, 'upcoming')[9] | default('') }}
+          {{ state_attr(this.entity_id, 'upcoming')[9] | default('') | regex_replace(allowed_characters, "") }}
         upcoming_date_5: >
           {{ state_attr(this.entity_id, 'upcoming')[10] | default('') }}
         upcoming_item_5: >
-          {{ state_attr(this.entity_id, 'upcoming')[11] | default('') }}
+          {{ state_attr(this.entity_id, 'upcoming')[11] | default('') | regex_replace(allowed_characters, "") }}
         upcoming_date_6: >
           {{ state_attr(this.entity_id, 'upcoming')[12] | default('') }}
         upcoming_item_6: >
-          {{ state_attr(this.entity_id, 'upcoming')[13] | default('') }}
+          {{ state_attr(this.entity_id, 'upcoming')[13] | default('') | regex_replace(allowed_characters, "") }}
         upcoming_date_7: >
           {{ state_attr(this.entity_id, 'upcoming')[14] | default('') }}
         upcoming_item_7: >
-          {{ state_attr(this.entity_id, 'upcoming')[15] | default('') }}
+          {{ state_attr(this.entity_id, 'upcoming')[15] | default('') | regex_replace(allowed_characters, "") }}
         upcoming_date_8: >
           {{ state_attr(this.entity_id, 'upcoming')[16] | default('') }}
         upcoming_item_8: >
-          {{ state_attr(this.entity_id, 'upcoming')[17] | default('') }}
+          {{ state_attr(this.entity_id, 'upcoming')[17] | default('') | regex_replace(allowed_characters, "") }}
         upcoming_date_9: >
           {{ state_attr(this.entity_id, 'upcoming')[18] | default('') }}
         upcoming_item_9: >
-          {{ state_attr(this.entity_id, 'upcoming')[19] | default('') }}
+          {{ state_attr(this.entity_id, 'upcoming')[19] | default('') | regex_replace(allowed_characters, "") }}
         upcoming_date_10: >
           {{ state_attr(this.entity_id, 'upcoming')[20] | default('') }}
         upcoming_item_10: >
-          {{ state_attr(this.entity_id, 'upcoming')[21] | default('') }}
+          {{ state_attr(this.entity_id, 'upcoming')[21] | default('') | regex_replace(allowed_characters, "") }}
         upcoming_date_11: >
           {{ state_attr(this.entity_id, 'upcoming')[22] | default('') }}
         upcoming_item_11: >
-          {{ state_attr(this.entity_id, 'upcoming')[23] | default('') }}
+          {{ state_attr(this.entity_id, 'upcoming')[23] | default('') | regex_replace(allowed_characters, "") }}
         upcoming_date_12: >
           {{ state_attr(this.entity_id, 'upcoming')[24] | default('') }}
         upcoming_item_12: >
-          {{ state_attr(this.entity_id, 'upcoming')[25] | default('') }}
+          {{ state_attr(this.entity_id, 'upcoming')[25] | default('') | regex_replace(allowed_characters, "") }}
         upcoming_date_13: >
           {{ state_attr(this.entity_id, 'upcoming')[26] | default('') }}
         upcoming_item_13: >
-          {{ state_attr(this.entity_id, 'upcoming')[27] | default('') }}
+          {{ state_attr(this.entity_id, 'upcoming')[27] | default('') | regex_replace(allowed_characters, "") }}
         upcoming_date_14: >
           {{ state_attr(this.entity_id, 'upcoming')[28] | default('') }}
         upcoming_item_14: >
-          {{ state_attr(this.entity_id, 'upcoming')[29] | default('') }}
+          {{ state_attr(this.entity_id, 'upcoming')[29] | default('') | regex_replace(allowed_characters, "") }}
         upcoming_date_15: >
           {{ state_attr(this.entity_id, 'upcoming')[30] | default('') }}
         upcoming_item_15: >
-          {{ state_attr(this.entity_id, 'upcoming')[31] | default('') }}
+          {{ state_attr(this.entity_id, 'upcoming')[31] | default('') | regex_replace(allowed_characters, "") }}
         upcoming_date_16: >
           {{ state_attr(this.entity_id, 'upcoming')[32] | default('') }}
         upcoming_item_16: >
-          {{ state_attr(this.entity_id, 'upcoming')[33] | default('') }}
+          {{ state_attr(this.entity_id, 'upcoming')[33] | default('') | regex_replace(allowed_characters, "") }}
         upcoming_date_17: >
           {{ state_attr(this.entity_id, 'upcoming')[34] | default('') }}
         upcoming_item_17: >
-          {{ state_attr(this.entity_id, 'upcoming')[35] | default('') }}
+          {{ state_attr(this.entity_id, 'upcoming')[35] | default('') | regex_replace(allowed_characters, "") }}
         upcoming_date_18: >
           {{ state_attr(this.entity_id, 'upcoming')[36] | default('') }}
         upcoming_item_18: >
-          {{ state_attr(this.entity_id, 'upcoming')[37] | default('') }}
+          {{ state_attr(this.entity_id, 'upcoming')[37] | default('') | regex_replace(allowed_characters, "") }}
 
 - trigger:
     - platform: time_pattern

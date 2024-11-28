@@ -7,7 +7,7 @@ substitutions:
   friendly_name: eInk-WeatherBoard
   project_name: "Trip5.eInk-WeatherBoard"
   comment: "eInk-WeatherBoard from Trip5"
-  project_version: "2024.08.09"
+  project_version: "2024.11.28"
   time_zone: "Asia/Seoul" # Check https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
   adc_pin: GPIO34
   sleep_time: 60min # this is the default but is overridden
@@ -17,6 +17,9 @@ substitutions:
   ha_disable_deep_sleep: input_boolean.eink_weatherboard_disable_deep_sleep
   ha_weather_data: sensor.eink_weatherboard_data
   ha_wake_times: sensor.eink_weatherboard_wake_times
+
+# A physical switch to disable deep sleep (optional, if no physical switch is attached then no problem)
+  deep_sleep_disable_pin: GPIO21
 
 # Waveshare eInk Board:
   status_led_pin: GPIO2
@@ -35,42 +38,40 @@ substitutions:
   # model: 7.50in-bV3 # a bit washed-out (use white 100%)
   # model: 7.50inV2alt # a bit washed-out (use white 100%)
 
-  # Two custom components work with the 7.5 inch Waveshare displays... If you want to see the full discussion: https://github.com/esphome/feature-requests/issues/239
-
-  # atomicmike's custom component should be closer to the manufacturer's spec but but might have issues - be sure it's specified properly below too! (inverted true)
-  # model: 7.50inv2b
-  # reset_duration: 3ms
-
-  # There is some speculation that twisterss' custom component might be better - be sure it's specified properly below too! (inverted true)
-  model: 7.50in-bv2-rb
+   # JonasB2497's component will soon be in official ESPHome... it works!
+  model: 7.50in-bv3-bwr
   reset_duration: 2ms
 
 external_components:
-# use atomicmike's repo:
-#  - source:
-#      type: git
-#      url: https://github.com/atomicmike/esphome.git
-#      ref: waveshare-color-2023.12
-#    components: [ waveshare_epaper ]
-
-# use twisterss' repo:
+# use JonasB2497's repo:
   - source:
       type: git
-      url:  https://github.com/twisterss/esphome-dev.git
-      ref: waveshare-red-black
+      url:  https://github.com/JonasB2497/esphome.git
+      ref: waveshare-bwr
     components: [ waveshare_epaper ]
 
 esphome:
-  name: $name
-  comment: "$comment"
+  name: ${name}
+  comment: "${comment}"
   project:
-    name: "$project_name"
-    version: "$project_version"
+    name: "${project_name}"
+    version: "${project_version}"
   on_boot:
-      priority: 200.0
+      priority: -100.0
       then:
-        #- lambda: 'id(recorded_display_refresh) = 63;' # if you need to manually update the number of refreshes
-        - script.execute: get_data_then_refresh_screen
+        # - lambda: 'id(recorded_display_refresh) = 1488;' # if you need to manually update the number of refreshes (flash once with a set value then comment the line and reflash again)
+        - script.execute: led_blink
+        - wait_until:
+            condition: api.connected
+        - if:
+            condition:
+              or:
+                - binary_sensor.is_on: deep_sleep_disable_ha # checks Home Assistant Helper
+                - binary_sensor.is_on: deep_sleep_disable_switch # checks physical switch
+            then:
+              - script.execute: deep_sleep_evaluation
+            else:
+              - script.execute: get_data_then_refresh_screen
 
 esp32:
   board: esp32dev
@@ -89,7 +90,7 @@ wifi:
   password: !secret wifi_password
   fast_connect: true
   ap:
-    ssid: $name
+    ssid: ${name}
     password: !secret ap_password
 
 web_server:
@@ -112,11 +113,11 @@ api:
 
 button:
   - platform: restart
-    name: "$friendly_name Restart"
+    name: "${friendly_name} Restart"
     id: "Restart"
     internal: true
   - platform: template
-    name: "$friendly_name Refresh Screen"
+    name: "${friendly_name} Refresh Screen"
     entity_category: config
     on_press:
       - lambda: 'id(data_updated) = true;'
@@ -126,7 +127,7 @@ output:
   - platform: ledc
     id: statusled
     pin:
-      number: $status_led_pin
+      number: ${status_led_pin}
       ignore_strapping_warning: true
 
 light:
@@ -151,8 +152,8 @@ color:
 
 # Pins for Waveshare ePaper ESP Board
 spi:
-  clk_pin: $clk_pin
-  mosi_pin: $mosi_pin
+  clk_pin: ${clk_pin}
+  mosi_pin: ${mosi_pin}
       
 # Global variables for detecting if the display needs to be refreshed.
 globals:
@@ -173,7 +174,6 @@ script:
   - id: get_data_then_refresh_screen
     mode: restart
     then:
-      - script.execute: led_blink
       - wait_until:
           condition:
             lambda: 'return id(data_updated) == true;'
@@ -206,11 +206,8 @@ script:
           then:
             - lambda: 'id(recorded_display_refresh) += 1;'
             - lambda: 'id(display_last_update).publish_state(id(homeassistant_time).now().timestamp);'
-            - output.turn_on: statusled
             - logger.log: "Refreshing display..."
-            - light.turn_on: led1
             - component.update: eink_display
-            - script.execute: led_blink
             - lambda: 'id(data_updated) = false;'
             - delay: 5s # If deep sleep follows immediately, then we need a short delay here so HA catches the refresh count
           else:
@@ -222,7 +219,9 @@ script:
     then:
       - if:
           condition:
-            binary_sensor.is_on: disable_deep_sleep
+            or:
+              - binary_sensor.is_on: deep_sleep_disable_ha # checks Home Assistant Helper
+              - binary_sensor.is_on: deep_sleep_disable_switch # checks physical switch
           then:
             - logger.log: 'Deep Sleep Disabled.'
             - script.execute: deep_sleep_disabled_check_refresh_time
@@ -230,6 +229,8 @@ script:
             - wait_until:
                 condition:
                   lambda: 'return (id(wake_time_helper).state >= (6 * 60));'
+            - script.stop: led_blink
+            - light.turn_off: led1
             - deep_sleep.enter:
                 id: deep_sleep_control
                 sleep_duration: !lambda return id(wake_time_helper).state * 1000;   #lambdas should return value as ms
@@ -257,11 +258,11 @@ script:
 
 deep_sleep:
   id: deep_sleep_control
-  sleep_duration: $sleep_time
+  sleep_duration: ${sleep_time}
 
 time:
   - platform: homeassistant
-    timezone: "$time_zone"
+    timezone: "${time_zone}"
     id: homeassistant_time
     # if using USB battery, deep sleep is disabled, and more constant refreshes are OK, then you may need this bit:
     #on_time:
@@ -270,15 +271,34 @@ time:
     #     then:
     #       - script.execute: get_data_then_refresh_screen
 
-# The following are boolean helpers in Home Assistant
 binary_sensor:
-  - platform: homeassistant
-    id: disable_deep_sleep
-    name: "$friendly_name Disable Deep Sleep"
+  - platform: template
+    name: "${friendly_name} Battery Warning"
+    id: battery_warning
+    device_class: battery
+    lambda: |-
+      if (id(battery_adc).state <= 3.4) {
+        return true;
+      } else {
+        return false;
+      }
+  - platform: gpio # This sensor is for physical switch to enable deep sleep
+    pin: 
+      number: ${deep_sleep_disable_pin}
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+    name: "${friendly_name} Disable Deep Sleep Switch"
+    id: deep_sleep_disable_switch
+# The following are boolean helpers in Home Assistant
+  - platform: homeassistant # This sensor is for Home Assistant helper switch to disable deep sleep, remove if not used
+    id: deep_sleep_disable_ha
+    name: "${friendly_name} Disable Deep Sleep HA"
     entity_id: '${ha_disable_deep_sleep}'
-  - platform: homeassistant
+  - platform: homeassistant # This sensor is for Home Assistant helper switch to disable updates
     id: disable_update
-    name: "$friendly_name Disable Update"
+    name: "${friendly_name} Disable Update"
     entity_id: '${ha_disable_update}'
 
 # Include custom fonts:
@@ -301,32 +321,32 @@ font:
   - file: 'fonts/Gotham-Rounded-Bold.ttf'
     id: font_small_title
     size: 30
-    glyphs:  |
-      TODAY MRWULK
+    glyphs: |-
+      TODAYMRWULK
   - file: 'fonts/Gotham-Rounded-Medium.ttf'
     id: font_today_time
     size: 20
-    glyphs:  |
+    glyphs: |-
       1234567890: AMP
   - file: 'fonts/Gotham-Rounded-Bold.ttf'
     id: font_today_temp
     size: 26
-    glyphs:  |
+    glyphs: |-
       °C 1234567890-
   - file: 'fonts/Gotham-Rounded-Medium.ttf'
     id: font_outlook_day
     size: 24
-    glyphs:  |
+    glyphs: |-
       Sun MoTeWdhFriat
   - file: 'fonts/Gotham-Rounded-Bold.ttf'
     id: font_outlook_temp
     size: 28
-    glyphs:  |
+    glyphs: |-
       °C 1234567890-
   - file: 'fonts/Gotham-Rounded-Book.ttf'
     id: font_refresh_stamp
     size: 20
-    glyphs:  |
+    glyphs: |-
       Refrshd at1234567890:AMPSunoTWFi
 
   # Include Material Design Icons font (for weather & sync & battery icons) (by Austin Andrews / Templarian)
@@ -383,13 +403,13 @@ font:
 sensor:  
   # Create sensors for monitoring the board remotely.
   - platform: template
-    name: "$friendly_name Display Last Update"
+    name: "${friendly_name} Display Last Update"
     device_class: timestamp
     entity_category: "diagnostic"
     id: display_last_update
     update_interval: 3s
   - platform: template
-    name: "$friendly_name Recorded Display Refresh"
+    name: "${friendly_name} Recorded Display Refresh"
     accuracy_decimals: 0
     unit_of_measurement: "Refreshes"
     state_class: "total_increasing"
@@ -397,7 +417,7 @@ sensor:
     lambda: 'return id(recorded_display_refresh);'
     update_interval: 3s
   - platform: wifi_signal
-    name: "$friendly_name WiFi Signal Strength"
+    name: "${friendly_name} WiFi Signal Strength"
     id: wifisignal
     unit_of_measurement: "dBm"
     entity_category: "diagnostic"
@@ -409,17 +429,18 @@ sensor:
           send_every: 5
           send_first_at: 5
   - platform: adc
-    name: "$friendly_name Battery"
+    name: "${friendly_name} Battery"
     id: battery_adc
-    pin: $adc_pin
+    pin: ${adc_pin}
     attenuation: 12db
     update_interval: 3s
     entity_category: "diagnostic"
     accuracy_decimals: 2
+    device_class: battery
     filters:
       # this multiply number may need to be manually adjusted with power on while idle
-      # I used a LiPo battery: negative pole -> 33K resistor -> ADC GPIO -> 100K resistor -> GND
-      - multiply: 1.33
+      # I used a 3.7V LiPo battery: 5V -> 100K resistor & 100nF capacitor -> ADC -> 33K resistor -> GND
+      - multiply: 3.95
       #use moving median to smooth spikes
       - median:
           window_size: 5
@@ -484,7 +505,7 @@ sensor:
       then:
          - lambda: 'id(data_updated) = true;'
   - platform: homeassistant
-    name: "$friendly_name Wake Time Helper"
+    name: "${friendly_name} Wake Time Helper"
     id: wake_time_helper
     entity_id: '${ha_wake_times}'
     attribute: wake_time_helper
@@ -495,22 +516,22 @@ sensor:
 
 text_sensor:
   - platform: version
-    name: "$friendly_name ESPHome Version"
+    name: "${friendly_name} ESPHome Version"
     hide_timestamp: true
     entity_category: diagnostic
   - platform: wifi_info
     ip_address:
       id: wifi_ip
-      name: "$friendly_name IP Address"
+      name: "${friendly_name} IP Address"
       entity_category: diagnostic
     ssid:
       id: wifi_ssid
-      name: "$friendly_name SSID"
+      name: "${friendly_name} SSID"
       entity_category: diagnostic
   - platform: template
-    name: "$friendly_name $project_name Version"
+    name: "${friendly_name} ${project_name} Version"
     lambda: |-
-      return {"$project_version"};
+      return {"${project_version}"};
     entity_category: diagnostic
 
   # Call text sensors from Home Assistant
@@ -647,15 +668,15 @@ display:
   - platform: waveshare_epaper
     id: eink_display
     cs_pin:
-      number: $cs_pin
+      number: ${cs_pin}
       ignore_strapping_warning: true
-    dc_pin: $dc_pin
+    dc_pin: ${dc_pin}
     busy_pin:
-      number: $busy_pin
-      inverted: $busy_inverted
-    reset_pin: $reset_pin
-    reset_duration: $reset_duration
-    model: $model
+      number: ${busy_pin}
+      inverted: ${busy_inverted}
+    reset_pin: ${reset_pin}
+    reset_duration: ${reset_duration}
+    model: ${model}
     update_interval: never
     setup_priority: 1000
     rotation: 90°
@@ -767,8 +788,9 @@ display:
       int batt_x = 440; 
       int batt_y = 712;
       float batt_v = float(id(battery_adc).state);
-      if (0 <= batt_v && batt_v < 3.3) { it.printf(batt_x, batt_y, id(font_battery_glyphs), color_red, TextAlign::TOP_CENTER, "%s", battery_icon_map["batterywarn"].c_str()); }
-      if (3.3 <= batt_v && batt_v < 3.6) { it.printf(batt_x, batt_y, id(font_battery_glyphs), color_red, TextAlign::TOP_CENTER, "%s", battery_icon_map["batterylow"].c_str()); }
+      if (0 <= batt_v && batt_v < 3.4) { it.printf(batt_x, batt_y, id(font_battery_glyphs), color_red, TextAlign::TOP_CENTER, "%s", battery_icon_map["batterywarn"].c_str()); }
+      if (3.4 <= batt_v && batt_v < 3.6) { it.printf(batt_x, batt_y, id(font_battery_glyphs), color_red, TextAlign::TOP_CENTER, "%s", battery_icon_map["batterylow"].c_str()); }
       if (3.6 <= batt_v && batt_v < 3.8) { it.printf(batt_x, batt_y, id(font_battery_glyphs), color_blk, TextAlign::TOP_CENTER, "%s", battery_icon_map["batterymed"].c_str()); }
-      if (3.8 <= batt_v) { it.printf(batt_x, batt_y, id(font_battery_glyphs), color_blk, TextAlign::TOP_CENTER, "%s", battery_icon_map["batteryhigh"].c_str()); }
+      if (3.8 <= batt_v && batt_v < 4.3) { it.printf(batt_x, batt_y, id(font_battery_glyphs), color_blk, TextAlign::TOP_CENTER, "%s", battery_icon_map["batteryhigh"].c_str()); }
+      // battery icon not displayed if voltage is above 4.3V (but ADC must still be connected to 5V pin)
  

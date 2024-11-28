@@ -12,7 +12,7 @@ The Devices rely on using template sensors. If you haven't split your `configura
 
 Put this in your `configuration.yaml`:
 
-```
+```yaml
 template: !include template.yaml
 ```
 
@@ -24,7 +24,7 @@ My Weatherboard code if heavily derived from Madelena Mak's [Weatherman Dashboar
 
 This relies on the OpenWeatherMap integration to function.  In its unedited form, requires 1 service: `openweathermap` (it seems `onecall_daily` and `onecall_hourly` are not relevant anymore). Read more about that [here](https://www.home-assistant.io/integrations/openweathermap).
 
-The simple YAML uses 2-hour increments to the hourly forecast but this is adjustable by variables.  There are also notes in the code about how to change the datestamp if you don't prefer the formats I use.  Other than those 2 points, there should not be much editing of the code to make it functional.  Except, of course, for the waketimes.  See the notes below and in the yaml.
+The simple YAML uses 2-hour increments to the hourly forecast but this is adjustable by variables.  There are also notes in the code about how to change the datestamp if you don't prefer the formats I use.  Other than those 2 points, there should not be much editing of the code to make it functional.  Except, of course, for the waketimes.  See the notes below and in the YAML.
 
 [`HomeAssistant_template_weather.yaml`](HomeAssistant_template_weather.yaml)
 
@@ -32,7 +32,7 @@ The dynamic YAML can use any times ahead of the current time (ie after midnight 
 
 [`HomeAssistant_template_weather_dynamic.yaml`](HomeAssistant_template_weather.yaml)
 
-Please note that in both versions, titles are now editable. Be sure your ESPHome YAML the characters you use are defined in the fonts section.
+Please note that in both versions, titles are now editable. Be sure that the characters you use are defined in the `glyphs` of the `fonts` section.
 
 #### TasksBoard
 
@@ -47,6 +47,8 @@ Certain events like holidays (which are pulled from a calendar), I wish only to 
 Please note my preferred `time_pattern` is every 3 minutes.  It takes 2 runs to completely populate all the sensors.  That means 6 minutes total.  Keep that in mind if you decide to increase the value.  Also, although it's not too intensive on the machine, it certainly isn't no work at all, so if your machine is weak (like a Pi), you may wish to increase the time.
 
 Also, keep in mind that Home Assistant reloads Google Tasks and Calendar data every 15 minutes so in theory it could take 29 minutes for items to sync to HA. So if running a waketime at midnight or shortly after, today's TO DO may not be ready yet.  Sidenote that you can reload todo lists and calendars manually with the service `homeassistant.reload_config_entry` if needed.
+
+Also note that I have included a character filter so that unavailable characters do not appear on the board.  This should match the `glyphs` of the `fonts` section in your ESPHome YAML.  You can, of course, allow certain characters that are not in the glyphs list and then use sensor filters in your ESPHome YAML to make them print as something else (for example, add € to the HA filter and use a substitute filter in the ESPHome YAML to change it to an E). I personally prefer to simply drop the character completely.
 
 [`HomeAssistant_template_tasks.yaml`](HomeAssistant_template_tasks.yaml)
 
@@ -67,15 +69,21 @@ The Disable Deep Sleep helper may be used to keep the ESP board from entering de
 The Disable Update helper is used to avoid screen refreshing. It is useful to have an automation turn it on and off, depending on who is home (no point in wasting a screen refresh if no one will see it).
 
 #### WeatherBoard
-```
+```yaml
 input_boolean.eink_weatherboard_disable_deep_sleep
 input_boolean.eink_weatherboard_disable_update
 ```
 #### TasksBoard
-```
+```yaml
 input_boolean.eink_tasksboard_disable_deep_sleep
 input_boolean.eink_tasksboard_disable_update
 ```
+
+## Physical Switch
+
+The physical switch can also be used to disable deep sleep.  Please note I have also added a check on boot. If deep sleep is disabled either through
+the Home Assistant helper or the physical switch, the screen will not be updated on boot.  Please note that it is not actually necessary to actually
+include the physical switch in your build.  It will continue to function as normal without it.
 
 # ESPHome
 
@@ -127,11 +135,15 @@ Here's how to open the connector: lift up the darker lever with your fingernail 
 
 This board is used to allow the ESP32 to monitor the battery power as well as make disconnecting the ESP32 Board and battery easy.
 
-The board allows battery monitoring by connecting a 33K resistor between the 5V input pin and the ADC pin (GPIO34) and then a 100K resistor from ADC to ground.  I also added a 1000uF capacitor between the 5V pin and ground. This seems to help ESP32s that may have trouble booting from a sagging battery.  And of course, battery connections to the 5V input pin and ground.
+The board allows battery monitoring by connecting a 100K resistor and 100pF capacitor between the 5V input pin and the ADC pin (GPIO34) and then a 33K resistor from ADC to ground.  I also added a 1000uF capacitor between the 5V pin and ground. This seems to help ESP32s that may have trouble booting from a sagging battery.  And of course, battery connections to the 5V input pin and ground.
 
-The sockets are extras included with D1 Minis but I'm sure any sockets that have a 2.54 pitch will work fine.  I also pulled out every pin next to a used pin in the sockets, mostly because on my first attempt, I shorted 5V to CMD which resulted in the board not booting.  I left about 4 of 8 pins intact for stability.
+Optionally, you can include a physical switch between ground and GPIO21. If switched on, deep sleep will be disabled.
 
-A lot of the connections are made under the board by using the legs of the resistors and capacitors to meet the ends of the socket pins (which were then clipped and soldered to make them roundish).  I used half of a resistor leg to hold the battery connector lead in place.
+The sockets are extras included with D1 Minis but I'm sure any sockets that have a 2.54 pitch will work fine.  I also pulled out half of the socket pin to keep from accidentally shorting connections.
+
+A lot of the connections are made under the board by using the legs of the resistors and capacitors to meet the ends of the socket pins (which were then clipped and soldered to make them roundish).  I used a bit of wire soldered to the board to hold the wires in place.
+
+[Here is a more detailed sketch.](./images/board-sketch.png)
 
 ## Charger
 
@@ -170,7 +182,7 @@ Also you can see a white bit cut out of what used to be the spacer at the front 
 
 ![image](./images/build4.jpg)
 
-Later... I ended up using epoxy glue on velcro because sticky velcro tape doesn't stick to MDF board well (and super glue just soaks into the MDF).
+I ended up using epoxy glue on velcro because sticky velcro tape doesn't stick to MDF board well (and super glue just soaks into the MDF).
 You could use masking tape to hold down the cable, too. I also ended up using picture hanging wire twisted tight around the top 2 D-rings. It's secure enough.
 
 
@@ -178,6 +190,7 @@ You could use masking tape to hold down the cable, too. I also ended up using pi
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
+| 2024.11.28 | Fixes to Battery measurement, physical switch, fixes for fonts (ESPHome 2024.11), allowed_characters filter in HA YAML, using JonasB2497's component (until it is included in ESPHome official), build pictures updated |
 | 2024.08.10 | Titles & daily forecast now possible to be dynamic |
 | 2024.08.04 | Added the dynamic Home Assistant Weatherboard Template, added variables to both |
 | 2024.07.14 | Fixes to ESPHome OTA & how sensors reported to HA |
