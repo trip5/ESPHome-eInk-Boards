@@ -48,7 +48,9 @@ Please note my preferred `time_pattern` is every 3 minutes.  It takes 2 runs to 
 
 Also, keep in mind that Home Assistant reloads Google Tasks and Calendar data every 15 minutes so in theory it could take 29 minutes for items to sync to HA. So if running a waketime at midnight or shortly after, today's TO DO may not be ready yet.  Sidenote that you can reload todo lists and calendars manually with the service `homeassistant.reload_config_entry` if needed.
 
-Also note that I have included a character filter so that unavailable characters do not appear on the board.  This should match the `glyphs` of the `fonts` section in your ESPHome YAML.  You can, of course, allow certain characters that are not in the glyphs list and then use sensor filters in your ESPHome YAML to make them print as something else (for example, add € to the HA filter and use a substitute filter in the ESPHome YAML to change it to an E). I personally prefer to simply drop the character completely.
+Also note that I have included a character filter so that unavailable characters do not appear on the board.  This should match the `glyphs` of the `fonts` section in your ESPHome YAML.  You can, of course, allow certain characters that are not in the glyphs list and then use sensor filters in your ESPHome YAML to make them print as something else (for example, add € to the HA filter to let it through and use a substitute filter in the ESPHome YAML to change it to an E). I personally prefer to simply drop special characters completely.
+
+Please note that I'm pretty sure Pillow (the element of ESPHome uses to encode characters into pictures) limits the number of glyphs. I believe it's 255.
 
 [`HomeAssistant_template_tasks.yaml`](HomeAssistant_template_tasks.yaml)
 
@@ -97,7 +99,7 @@ Because the YAML has plenty of notes scattered throughout it, I won't waste spac
 
 A note here that the list is somewhat dynamic.  As more TO DO tasks are displayed, the UPCOMING list is pushed further down and will not attempt to display items that do not fit.  If no TO DO items are available, it will have a default "Nothing today!" message that you may wish to edit.  Again, there are plenty of notes scattered throughout the YAML so check it carefully.
 
-Please note that you may see a missing glyph (always a black box ■) on your board.  The solution is quite simple.  Add the character to the glyphs lists in the ESPHome YAML.  If you see an unknown character glyph (in the Gotham-Round fonts similar as ☒) instead, it means the font is missing that character. The solution is to either change the font, avoid using the character, or ignore it. For example, I have defined the South Korean Won currency symbol (₩) even though it is not present in the font. I'd rather see the ☒ instead of ■. Please note that I'm pretty sure Pillow (the element of ESPHome uses to encode characters into pictures) limits the number of glyphs. I believe it's 255.
+Please note that you may see a missing glyph (always a black box ■) on your board.  The solution is quite simple.  Add the character to the glyphs lists in the ESPHome YAML.  If the character doesn't exist in the font, ESPHome will show an error.  You may need to edit the character filter in Home Assistant.
 
 [`ESPHome_eink-tasksboard.yaml`](ESPHome_eink-tasksboard.yaml)
 
