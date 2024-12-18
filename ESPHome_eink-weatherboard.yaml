@@ -29,26 +29,13 @@ substitutions:
   dc_pin: GPIO27
   reset_pin: GPIO26
   busy_pin: GPIO25
-  busy_inverted: "true" #needed on most newer boards: check ESPHome or component notes
+  busy_inverted: "True" #needed on most newer boards: check ESPHome or component notes
 
-  # Everything here is meant for an 7.5 inch tricolor display, which is not directly supported by ESPHome
+  # Everything here is meant for an 7.5 inch tricolor display, which is (as of 2024.12.0) now directly supported by ESPHome (thanks, JonasB2497!)
   # See here for full list of directly-supported displays: https://esphome.io/components/display/waveshare_epaper.html
   # if using only BW, then you may need to edit colors below (change red to same as black)
-  # model: 7.50in-bV2 # Looks good but crazy flashing (use white 100%)
-  # model: 7.50in-bV3 # a bit washed-out (use white 100%)
-  # model: 7.50inV2alt # a bit washed-out (use white 100%)
-
-   # JonasB2497's component will soon be in official ESPHome... it works!
   model: 7.50in-bv3-bwr
   reset_duration: 2ms
-
-external_components:
-# use JonasB2497's repo:
-  - source:
-      type: git
-      url:  https://github.com/JonasB2497/esphome.git
-      ref: waveshare-bwr
-    components: [ waveshare_epaper ]
 
 esphome:
   name: ${name}
@@ -86,17 +73,18 @@ ota:
     password: !secret ota_password
 
 wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_password
-  fast_connect: true
+  networks:
+    - ssid: !secret wifi_ssid
+      password: !secret wifi_password
+  fast_connect: True
   ap:
     ssid: ${name}
     password: !secret ap_password
 
 web_server:
   port: 80
-  ota: true
-  include_internal: true # probably not necessary, as it will expose more than needed to the Web UI
+  ota: True
+  include_internal: True # probably not necessary, as it will expose more than needed to the Web UI
 
 captive_portal:
 
@@ -115,7 +103,7 @@ button:
   - platform: restart
     name: "${friendly_name} Restart"
     id: "Restart"
-    internal: true
+    internal: True
   - platform: template
     name: "${friendly_name} Refresh Screen"
     entity_category: config
@@ -128,14 +116,14 @@ output:
     id: statusled
     pin:
       number: ${status_led_pin}
-      ignore_strapping_warning: true
+      ignore_strapping_warning: True
 
 light:
   - platform: monochromatic
     id: led1
     name: "LED"
     output: statusled
-    internal: true
+    internal: True
 
 # Define colors - this design is white on black so this is necessary
 color:
@@ -285,10 +273,10 @@ binary_sensor:
   - platform: gpio # This sensor is for physical switch to enable deep sleep
     pin: 
       number: ${deep_sleep_disable_pin}
-      inverted: true
+      inverted: True
       mode:
-        input: true
-        pullup: true
+        input: True
+        pullup: True
     name: "${friendly_name} Disable Deep Sleep Switch"
     id: deep_sleep_disable_switch
 # The following are boolean helpers in Home Assistant
@@ -517,7 +505,7 @@ sensor:
 text_sensor:
   - platform: version
     name: "${friendly_name} ESPHome Version"
-    hide_timestamp: true
+    hide_timestamp: True
     entity_category: diagnostic
   - platform: wifi_info
     ip_address:
@@ -669,7 +657,7 @@ display:
     id: eink_display
     cs_pin:
       number: ${cs_pin}
-      ignore_strapping_warning: true
+      ignore_strapping_warning: True
     dc_pin: ${dc_pin}
     busy_pin:
       number: ${busy_pin}

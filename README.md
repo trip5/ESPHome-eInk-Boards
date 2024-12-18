@@ -159,7 +159,6 @@ So simple, right?  This allows you to check the approximate power of your batter
 
 First you'll need to align the display.  The ESPHome YAML includes some rectangles you can uncomment to get some alignment rectangles.  Line it up as such and then carefully flip it and put some masking tape down to keep it that way.  Nevermind how the font looks in this picture.  I was testing the OTF version of the fonts... TTF files are better.
 
-
 ## Building
 
 ![image](./images/build0.jpg)
@@ -192,6 +191,7 @@ You could use masking tape to hold down the cable, too. I also ended up using pi
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
+| 2024.12.18 | Official support now in ESPHome 2024.12.0 |
 | 2024.11.28 | Fixes to Battery measurement, physical switch, fixes for fonts (ESPHome 2024.11), allowed_characters filter in HA YAML, using JonasB2497's component (until it is included in ESPHome official), build pictures updated |
 | 2024.08.10 | Titles & daily forecast now possible to be dynamic |
 | 2024.08.04 | Added the dynamic Home Assistant Weatherboard Template, added variables to both |
