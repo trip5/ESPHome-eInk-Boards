@@ -30,7 +30,7 @@ The simple YAML uses 2-hour increments to the hourly forecast but this is adjust
 
 The dynamic YAML can use any times ahead of the current time (ie after midnight until 6am you can display hourly weather for 9 am, 12 noon, 3 pm, and 6pm).  You may want to edit the times. Which days shown for the daily forecast are also dynamic.
 
-[`HomeAssistant_template_weather_dynamic.yaml`](HomeAssistant_template_weather.yaml)
+[`HomeAssistant_template_weather_dynamic.yaml`](HomeAssistant_template_weather_dynamic.yaml)
 
 Please note that in both versions, titles are now editable. Be sure that the characters you use are defined in the `glyphs` of the `fonts` section.
 
