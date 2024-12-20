@@ -35,7 +35,6 @@ substitutions:
   # See here for full list of directly-supported displays: https://esphome.io/components/display/waveshare_epaper.html
   # if using only BW, then you may need to edit colors below (change red to same as black)
   model: 7.50in-bv3-bwr
-  reset_duration: 2ms
 
 esphome:
   name: ${name}
@@ -663,7 +662,6 @@ display:
       number: ${busy_pin}
       inverted: ${busy_inverted}
     reset_pin: ${reset_pin}
-    reset_duration: ${reset_duration}
     model: ${model}
     update_interval: never
     setup_priority: 1000
