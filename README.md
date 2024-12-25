@@ -81,11 +81,30 @@ input_boolean.eink_tasksboard_disable_deep_sleep
 input_boolean.eink_tasksboard_disable_update
 ```
 
-## Physical Switch
+## Check & Reload Integrations
 
-The physical switch can also be used to disable deep sleep.  Please note I have also added a check on boot. If deep sleep is disabled either through
-the Home Assistant helper or the physical switch, the screen will not be updated on boot.  Please note that it is not actually necessary to actually
-include the physical switch in your build.  It will continue to function as normal without it.
+I encountered some problems with the Todo and Calendars integrations reporting their entities as unavailable and my boards not updating correctly.
+Here's a simple script that will run a check every 5 minutes on one entity and if it is unavailable, will reload the integration.
+Please note that you actually only need one entity per integration for it to function so if you use Google Tasks and Calendar, you will need 2 scripts total.
+
+```yaml
+alias: Reload Tasks
+description: ""
+triggers:
+  - trigger: time_pattern
+    minutes: /5
+conditions:
+  - condition: state
+    entity_id: todo.to_do
+    state: unavailable
+actions:
+  - action: homeassistant.reload_config_entry
+    metadata: {}
+    data: {}
+    target:
+      entity_id: todo.to_do
+mode: single
+```
 
 # ESPHome
 
@@ -146,6 +165,10 @@ The sockets are extras included with D1 Minis but I'm sure any sockets that have
 A lot of the connections are made under the board by using the legs of the resistors and capacitors to meet the ends of the socket pins (which were then clipped and soldered to make them roundish).  I used a bit of wire soldered to the board to hold the wires in place.
 
 [Here is a more detailed sketch.](./images/board-sketch.png)
+
+The physical switch can be used to disable deep sleep.  If deep sleep is disabled either through the Home Assistant helper or the physical switch,
+the screen will not be updated on boot.  Please note that it is not actually necessary to actually include the physical switch in your build.
+It will continue to function as normal without it.
 
 ## Charger
 
