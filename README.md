@@ -156,7 +156,7 @@ Here's how to open the connector: lift up the darker lever with your fingernail 
 
 This board is used to allow the ESP32 to monitor the battery power as well as make disconnecting the ESP32 Board and battery easy.
 
-The board allows battery monitoring by connecting a 100K resistor and 100pF capacitor between the 5V input pin and the ADC pin (GPIO34) and then a 33K resistor from ADC to ground.  I also added a 1000uF capacitor between the 5V pin and ground. This seems to help ESP32s that may have trouble booting from a sagging battery.  And of course, battery connections to the 5V input pin and ground.
+The board allows battery monitoring by connecting a 100K resistor and 100nF capacitor between the 5V input pin and the ADC pin (GPIO34) and then a 33K resistor from ADC to ground.  I also added a 1000uF capacitor between the 5V pin and ground. This seems to help ESP32s that may have trouble booting from a sagging battery.  And of course, battery connections to the 5V input pin and ground.
 
 Optionally, you can include a physical switch between ground and GPIO21. If switched on, deep sleep will be disabled.
 
