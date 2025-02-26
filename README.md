@@ -186,7 +186,7 @@ First you'll need to align the display.  The ESPHome YAML includes some rectangl
 
 ![image](./images/build0.jpg)
 
-Carefully remove all the extra hooks and stand from the backboard.  Then use a knife to make a cutout in the backboard a bit larger than the ESP32 board. This allows the power board to sit under the backboard and keep the ESP32 in place. A small cutout in the center at the bottom will allow the board to be removed and get around the D-ring that will be screwed in.  The D-rings are about 1cm down and it's recommended to put the D-rings in the frame before continuing and make sure this backboard can be removed easily.  Otherwise, the D-rings will lock the backboard in place.  Also, drilling the holes for the D-rings can make dust that can easily work its way in between the e-ink screen and the clear plastic.  Use a dust-blower if you can.
+Carefully remove all the extra hooks and stand from the backboard.  Then use a knife to make a cutout in the backboard a bit larger than the ESP32 board. This allows the power board to sit under the backboard and keep the ESP32 in place. A small cutout in the center at the bottom will allow the board to be removed and get around the D-ring that will be screwed in.  The D-rings are about 4cm from the corner and 1cm from the edge and it's recommended to put the D-rings in the frame before continuing and make sure this backboard can be removed easily.  Otherwise, the D-rings will lock the backboard in place.  Also, drilling the holes for the D-rings can make dust that can easily work its way in between the e-ink screen and the clear plastic.  Use a dust-blower if you can.
 
 ![image](./images/build1.jpg)
 
