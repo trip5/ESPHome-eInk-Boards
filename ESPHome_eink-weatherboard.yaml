@@ -172,8 +172,8 @@ script:
       - if:  # with longer sleep delays, the ESP32 tends to wake up a bit too early... if the wake time is within the next 8 minutes, wait for the scheduled wake time (less 30s) (preventing it from updating twice in a row)
           condition:
             lambda: 'return (id(wake_time_helper).state <= (8 * 60));'
-          then:
-            - delay: !lambda 'return (((id(wake_time_helper).state) - 30) * 1000);'
+          then: # if our calculated delay for waking is less than 0, then set it to 0 (to prevent negative delay)
+            - delay: !lambda 'return (((id(wake_time_helper).state - 30) < 0 ? 0 : (id(wake_time_helper).state - 30)) * 1000);'
       - if:
           condition:
             lambda: 'return id(data_updated) == true;'
