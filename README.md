@@ -214,7 +214,7 @@ You could use masking tape to hold down the cable, too. I also ended up using pi
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
-| 2025.05.09 | Fixed critical bug that caused the boards to stay awake, killing the battery [`PR 5`](ESPHome-eInk-Boards/pull/5) - thanks [`AStoker`](/AStoker)! |
+| 2025.05.09 | Fixed critical bug that caused the boards to stay awake, killing the battery [`PR 5`](/pull/5) - thanks [`AStoker`](https://github.com/AStoker)! |
 | 2024.12.18 | Official support for the tricolor boards now in ESPHome 2024.12.0 |
 | 2024.11.28 | Fixes to Battery measurement, physical switch, fixes for fonts (ESPHome 2024.11), allowed_characters filter in HA YAML, using JonasB2497's component (until it is included in ESPHome official), build pictures updated |
 | 2024.08.10 | Titles & daily forecast now possible to be dynamic |
