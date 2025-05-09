@@ -7,7 +7,7 @@ substitutions:
   friendly_name: eInk-TasksBoard
   project_name: "Trip5.eInk-TasksBoard"
   comment: "eInk-TasksBoard from Trip5"
-  project_version: "2024.11.28"
+  project_version: "2025.05.09"
   time_zone: "Asia/Seoul" # Check https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
   adc_pin: GPIO34
   sleep_time: 600min # this is the default but is overridden
