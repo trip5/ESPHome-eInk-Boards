@@ -4,9 +4,11 @@ These projects are meant to display Weather conditions or Tasks using various Ho
 ![image](./images/weatherboard.jpg)
 ![image](./images/tasksboard.jpg)
 
-# Home Assistant
+---
 
-## Sensors
+## Home Assistant
+
+### Sensors
 
 The Devices rely on using template sensors. If you haven't split your `configuration.yaml` yet, now isn't such a bad time to start because this will add hundreds of lines!
 
@@ -18,7 +20,7 @@ template: !include template.yaml
 
 Anything in `configuration.yaml` under the `template:` heading must now be moved to `template.yaml`. Take a quick look [here](https://community.home-assistant.io/t/how-do-i-setup-template-trigger-sensor-in-a-splitting-config/718626/) for some examples on an easy way to format `template.yaml`.
 
-#### WeatherBoard
+#### WeatherBoard Sensors
 
 My Weatherboard code if heavily derived from Madelena Mak's [Weatherman Dashboard](https://github.com/Madelena/esphome-weatherman-dashboard) and even more so from Stephan Wijman's updates on his [blog](https://blog.wijman.net/e-ink-weather-frame-with-esphome-and-home-assistant/).  Big thanks to both.
 
@@ -34,7 +36,7 @@ The dynamic YAML can use any times ahead of the current time (ie after midnight 
 
 Please note that in both versions, titles are now editable. Be sure that the characters you use are defined in the `glyphs` of the `fonts` section.
 
-#### TasksBoard
+### TasksBoard Sensors
 
 This code is inspired by the above code but is dramatically different in many ways.
 
@@ -54,7 +56,7 @@ Please note that I'm pretty sure Pillow (the element of ESPHome uses to encode c
 
 [`HomeAssistant_template_tasks.yaml`](HomeAssistant_template_tasks.yaml)
 
-#### Waketimes
+### Waketime Sensors
 
 Companion to the data sensors above (and included in the YAMLs) are the Waketime sensors.  The ESPHome will use deepsleep mode to preserve battery life.  As long as deepsleep is enabled (ie. not specifically disabled by the Helpers), the devices will enter deepsleep (using almost no power) in-between screen refreshes.  I have not tested the 10000mAh batteries fully but I expect for them to last about a year on a single charge.
 
@@ -62,7 +64,7 @@ Each of these sensors starts with a variable section wherein the daily wakeup sc
 
 The thing to keep in mind here is that although the wakeup schedule is controlled by Home Assistant, the device will not be aware of the next wakeup time until it actually wakes up again. If, for some reason, you reset the device (ie. by pulling the battery or pressing the BOOT button the ESP32), the board will update immediately and refresh the display and go back to sleep until it's next scheduled wakeup time according to whatever number of seconds Home Assistant has calculated for it.
 
-## Helpers
+### Helpers
 
 Create two helpers in the Devices & Services for each device.  These below names are how I use them in the ESPHome YAML later but you can (of course) use other names but be sure to edit the ESPHome YAML to match your sensor names.
 
@@ -81,7 +83,7 @@ input_boolean.eink_tasksboard_disable_deep_sleep
 input_boolean.eink_tasksboard_disable_update
 ```
 
-## Check & Reload Integrations
+### Check & Reload Integrations
 
 I encountered some problems with the Todo and Calendars integrations reporting their entities as unavailable and my boards not updating correctly.
 Here's a simple script that will run a check every 5 minutes on one entity and if it is unavailable, will reload the integration.
@@ -106,15 +108,17 @@ actions:
 mode: single
 ```
 
-# ESPHome
+---
 
-#### WeatherBoard
+## ESPHome
+
+### WeatherBoard
 
 Because the YAML has plenty of notes scattered throughout it, I won't waste space here.  Go through the YAML carefully and edit it according to your needs.
 
 [`ESPHome_eink-weatherboard.yaml`](ESPHome_eink-weatherboard.yaml)
 
-#### TasksBoard
+### TasksBoard
 
 A note here that the list is somewhat dynamic.  As more TO DO tasks are displayed, the UPCOMING list is pushed further down and will not attempt to display items that do not fit.  If no TO DO items are available, it will have a default "Nothing today!" message that you may wish to edit.  Again, there are plenty of notes scattered throughout the YAML so check it carefully.
 
@@ -122,7 +126,9 @@ Please note that you may see a missing glyph (always a black box ■) on your bo
 
 [`ESPHome_eink-tasksboard.yaml`](ESPHome_eink-tasksboard.yaml)
 
-# Building
+---
+
+## Building
 
 ### Materials List
 - Waveshare 7.5inch Three-color e-Paper Display: https://www.aliexpress.com/item/32833402189.html
@@ -138,7 +144,7 @@ Please note that you may see a missing glyph (always a black box ■) on your bo
 - TP4056 Battery charger (USB C): https://www.aliexpress.com/item/32836046028.html
 - Masking tape
 
-## Waveshare E-Paper ESP32 Driver Board
+### Waveshare E-Paper ESP32 Driver Board
 
 ![image](./images/e-Paper-ESP32-Driver-Board.jpg)
 
@@ -150,7 +156,7 @@ Here's how to open the connector: lift up the darker lever with your fingernail 
 
 ![image](./images/flexible-flat-cable-connector-lock.jpg)
 
-## Power Board
+### Power Board
 
 ![image](./images/board.jpg)
 
@@ -170,19 +176,19 @@ The physical switch can be used to disable deep sleep.  If deep sleep is disable
 the screen will not be updated on boot.  Please note that it is not actually necessary to actually include the physical switch in your build.
 It will continue to function as normal without it.
 
-## Charger
+### Charger
 
 ![image](./images/charger.jpg)
 
 So simple, right?  This allows you to check the approximate power of your battery as well as charging it.  It's molasses-in-January speed charging but it works and it's extremely safe, simple, and compact.  I doubt anyone will do something so silly as this but I'm including it to show my own preference.  It is held together by 2-stage epoxy glue.
 
-## Alignment
+### Alignment
 
 ![image](./images/align.jpg)
 
 First you'll need to align the display.  The ESPHome YAML includes some rectangles you can uncomment to get some alignment rectangles.  Line it up as such and then carefully flip it and put some masking tape down to keep it that way.  Nevermind how the font looks in this picture.  I was testing the OTF version of the fonts... TTF files are better.
 
-## Building
+### Building
 
 ![image](./images/build0.jpg)
 
@@ -209,6 +215,7 @@ Also you can see a white bit cut out of what used to be the spacer at the front 
 I ended up using epoxy glue on velcro because sticky velcro tape doesn't stick to MDF board well (and super glue just soaks into the MDF).
 You could use masking tape to hold down the cable, too. I also ended up using picture hanging wire twisted tight around the top 2 D-rings. It's secure enough.
 
+---
 
 ## Update History
 
@@ -222,6 +229,8 @@ You could use masking tape to hold down the cable, too. I also ended up using pi
 | 2024.07.14 | Fixes to ESPHome OTA & how sensors reported to HA |
 | 2024.05.25 | First release    |
 
+---
+
 ## Download Gotham-Rounded Fonts (from this Github)
 
 [Gotham-Rounded-Book](https://powernukkit.github.io/DownGit/index.html#/home?directFile=1&url=https://github.com/trip5/ESPHome-eInk-Boards/blob/main/fonts/Gotham-Rounded-Book.ttf)
@@ -234,6 +243,7 @@ You could use masking tape to hold down the cable, too. I also ended up using pi
 
 [MaterialDesign-Webfont](https://powernukkit.github.io/DownGit/index.html#/home?directFile=1&url=https://github.com/Templarian/MaterialDesign-Webfont/blob/master/fonts/materialdesignicons-webfont.ttf)
 
+---
 
 ## Useful Links
 
