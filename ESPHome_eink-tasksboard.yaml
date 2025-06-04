@@ -7,7 +7,7 @@ substitutions:
   friendly_name: eInk-TasksBoard
   project_name: "Trip5.eInk-TasksBoard"
   comment: "eInk-TasksBoard from Trip5"
-  project_version: "2025.05.09"
+  project_version: "2025.06.05"
   time_zone: "Asia/Seoul" # Check https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
   adc_pin: GPIO34
   sleep_time: 600min # this is the default but is overridden
@@ -47,6 +47,7 @@ esphome:
       then:
         # - lambda: 'id(recorded_display_refresh) = 2756;' # if you need to manually update the number of refreshes (flash once with a set value then comment the line and reflash again)
         - script.execute: led_blink
+        - script.execute: update_diagnostic_sensors
         - wait_until:
             condition: api.connected
         - if:
@@ -196,6 +197,7 @@ script:
             - logger.log: "Refreshing display..."
             - component.update: eink_display
             - lambda: 'id(data_updated) = false;'
+            - script.execute: update_diagnostic_sensors
             - delay: 5s # If deep sleep follows immediately, then we need a short delay here so HA catches the refresh count
           else:
             - logger.log: "Home Assistant Helper 'Disable Update' is on. Skipping display refresh."
@@ -242,6 +244,16 @@ script:
       - delay: 4s
       - light.turn_on: led1
       - script.execute: led_blink
+  - id: update_diagnostic_sensors
+    # This will update the diagnostic sensors
+    mode: restart
+    then:
+      - component.update: recorded_display_refreshes
+      - component.update: display_last_update
+      - component.update: wifisignal
+      - component.update: battery_adc
+      - delay: 60s
+      - script.execute: update_diagnostic_sensors
 
 deep_sleep:
   id: deep_sleep_control
@@ -347,48 +359,61 @@ sensor:
   # Create sensors for monitoring the board remotely.
   - platform: template
     name: "${friendly_name} Display Last Update"
+    id: display_last_update
+    update_interval: never
     device_class: timestamp
     entity_category: "diagnostic"
-    id: display_last_update
-    update_interval: 3s
   - platform: template
     name: "${friendly_name} Recorded Display Refresh"
+    id: recorded_display_refreshes
+    update_interval: never
     accuracy_decimals: 0
     unit_of_measurement: "Refreshes"
     state_class: "total_increasing"
     entity_category: "diagnostic"
     lambda: 'return id(recorded_display_refresh);'
-    update_interval: 3s
   - platform: wifi_signal
+    # actually called from a script
     name: "${friendly_name} WiFi Signal Strength"
     id: wifisignal
+    update_interval: never
     unit_of_measurement: "dBm"
     entity_category: "diagnostic"
-    update_interval: 3s
-    filters:
-      #use moving median to smooth spikes
-      - median:
-          window_size: 5
-          send_every: 5
-          send_first_at: 5
   - platform: adc
-    name: "${friendly_name} Battery"
-    id: battery_adc
+    # get an unfiltered reading from the ADC pin
+    name: "${friendly_name} Battery Unfiltered"
+    id: battery_adc_raw
+    update_interval: never
     pin: ${adc_pin}
     attenuation: 12db
-    update_interval: 3s
     entity_category: "diagnostic"
     accuracy_decimals: 2
     device_class: battery
+    unit_of_measurement: "V"
+    internal: True
     filters:
-      # this multiply number may need to be manually adjusted with power on while idle
-      # I used a 3.7V LiPo battery: 5V -> 100K resistor & 100nF capacitor -> ADC -> 33K resistor -> GND
-      - multiply: 3.95
-      #use moving median to smooth spikes
-      - median:
-          window_size: 5
-          send_every: 5
-          send_first_at: 5
+      # this multiply number may need to be manually adjusted
+      # I used a 3.7V LiPo battery: 5V -> 100K resistor -> ADC -> 100K resistor -> GND
+      #                                                    ADC -> 100nF capacitor -> GND
+      - multiply: 2
+  - platform: template
+    # This gets 5 readings (quickly) and calculates a median
+    name: "${friendly_name} Battery"
+    id: battery_adc
+    update_interval: never
+    entity_category: "diagnostic"
+    accuracy_decimals: 2
+    device_class: battery
+    unit_of_measurement: "V"
+    lambda: |-
+      float readings[5];
+      for (int i = 0; i < 5; i++) {
+        id(battery_adc_raw).update();
+        delay(50);  // wait for stable reading
+        readings[i] = id(battery_adc_raw).state;
+      }
+      std::sort(readings, readings + 5);
+      return readings[2];  // median value
 
   # Call numeric sensors from Home Assistant
   - platform: homeassistant

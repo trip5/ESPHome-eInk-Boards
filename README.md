@@ -52,7 +52,8 @@ Also, keep in mind that Home Assistant reloads Google Tasks and Calendar data ev
 
 Also note that I have included a character filter so that unavailable characters do not appear on the board.  This should match the `glyphs` of the `fonts` section in your ESPHome YAML.  You can, of course, allow certain characters that are not in the glyphs list and then use sensor filters in your ESPHome YAML to make them print as something else (for example, add € to the HA filter to let it through and use a substitute filter in the ESPHome YAML to change it to an E). I personally prefer to simply drop special characters completely.
 
-Please note that I'm pretty sure Pillow (the element of ESPHome uses to encode characters into pictures) limits the number of glyphs. I believe it's 255.
+Previous to 2025, Pillow (the element of ESPHome uses to encode characters into pictures) limits the number of glyphs that can be used. I believe it's 255.
+This limit may be removed now.
 
 [`HomeAssistant_template_tasks.yaml`](HomeAssistant_template_tasks.yaml)
 
@@ -162,15 +163,18 @@ Here's how to open the connector: lift up the darker lever with your fingernail 
 
 This board is used to allow the ESP32 to monitor the battery power as well as make disconnecting the ESP32 Board and battery easy.
 
-The board allows battery monitoring by connecting a 100K resistor and 100nF capacitor between the 5V input pin and the ADC pin (GPIO34) and then a 33K resistor from ADC to ground.  I also added a 1000uF capacitor between the 5V pin and ground. This seems to help ESP32s that may have trouble booting from a sagging battery.  And of course, battery connections to the 5V input pin and ground.
+The board allows battery monitoring by connecting a 100K resistor between the 5V input pin and the ADC pin (GPIO34) and then a 100K resistor
+from ADC to ground and a 100nF capacitor from ADC to ground.  I also added a 1000uF capacitor between the 5V pin and ground.
+This seems to help ESP32s that may have trouble booting from a sagging battery.  And of course, battery connections to the 5V input pin and ground.
 
 Optionally, you can include a physical switch between ground and GPIO21. If switched on, deep sleep will be disabled.
 
-The sockets are extras included with D1 Minis but I'm sure any sockets that have a 2.54 pitch will work fine.  I also pulled out half of the socket pin to keep from accidentally shorting connections.
+The sockets are extras included with D1 Minis but I'm sure any sockets that have a 2.54 pitch will work fine.  I also pulled out half
+of the socket pins to keep from accidentally shorting connections.
 
 A lot of the connections are made under the board by using the legs of the resistors and capacitors to meet the ends of the socket pins (which were then clipped and soldered to make them roundish).  I used a bit of wire soldered to the board to hold the wires in place.
 
-[Here is a more detailed sketch.](./images/board-sketch.png)
+[Here is a more detailed sketch.](./images/board-sketch.jpg)
 
 The physical switch can be used to disable deep sleep.  If deep sleep is disabled either through the Home Assistant helper or the physical switch,
 the screen will not be updated on boot.  Please note that it is not actually necessary to actually include the physical switch in your build.
@@ -221,6 +225,7 @@ You could use masking tape to hold down the cable, too. I also ended up using pi
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
+| 2025.06.05 | ADC Battery monitoring finally properly fixed (I fundamentally misunderstood how ADC worked, sorry!) - also, improved!
 | 2025.05.09 | Fixed critical bug that caused the boards to stay awake, killing the battery. Resolves https://github.com/trip5/ESPHome-eInk-Boards/issues/4 - thanks [`AStoker`](https://github.com/AStoker)! |
 | 2024.12.18 | Official support for the tricolor boards now in ESPHome 2024.12.0 |
 | 2024.11.28 | Fixes to Battery measurement, physical switch, fixes for fonts (ESPHome 2024.11), allowed_characters filter in HA YAML, using JonasB2497's component (until it is included in ESPHome official), build pictures updated |
