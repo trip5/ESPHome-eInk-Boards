@@ -7,8 +7,8 @@ substitutions:
   friendly_name: eInk-WeatherBoard
   project_name: "Trip5.eInk-WeatherBoard"
   comment: "eInk-WeatherBoard from Trip5"
-  project_version: "2025.06.05"
-  time_zone: "Asia/Seoul" # Check https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  project_version: "2026.02.22"
+  time_zone: "Asia/Seoul" # Check https://github.com/trip5/timezones.json/blob/master/timezones.md
   adc_pin: GPIO34
   sleep_time: 60min # this is the default but is overridden
 
@@ -29,7 +29,7 @@ substitutions:
   dc_pin: GPIO27
   reset_pin: GPIO26
   busy_pin: GPIO25
-  busy_inverted: "True" #needed on most newer boards: check ESPHome or component notes
+  busy_inverted: "true" #needed on most newer boards: check ESPHome or component notes
 
   # Everything here is meant for an 7.5 inch tricolor display, which is (as of 2024.12.0) now directly supported by ESPHome (thanks, JonasB2497!)
   # See here for full list of directly-supported displays: https://esphome.io/components/display/waveshare_epaper.html
@@ -76,15 +76,14 @@ wifi:
   networks:
     - ssid: !secret wifi_ssid
       password: !secret wifi_password
-  fast_connect: True
+  fast_connect: true
   ap:
     ssid: ${name}
     password: !secret ap_password
 
 web_server:
   port: 80
-  ota: True
-  include_internal: True # probably not necessary, as it will expose more than needed to the Web UI
+  # include_internal: true # probably not necessary, as it will expose more than needed to the Web UI
 
 captive_portal:
 
@@ -103,7 +102,7 @@ button:
   - platform: restart
     name: "${friendly_name} Restart"
     id: "Restart"
-    internal: True
+    internal: true
   - platform: template
     name: "${friendly_name} Refresh Screen"
     entity_category: config
@@ -116,14 +115,14 @@ output:
     id: statusled
     pin:
       number: ${status_led_pin}
-      ignore_strapping_warning: True
+      ignore_strapping_warning: true
 
 light:
   - platform: monochromatic
     id: led1
     name: "LED"
     output: statusled
-    internal: True
+    internal: true
 
 # Define colors - this design is white on black so this is necessary
 color:
@@ -284,10 +283,10 @@ binary_sensor:
   - platform: gpio # This sensor is for physical switch to enable deep sleep
     pin: 
       number: ${deep_sleep_disable_pin}
-      inverted: True
+      inverted: true
       mode:
-        input: True
-        pullup: True
+        input: true
+        pullup: true
     name: "${friendly_name} Disable Deep Sleep Switch"
     id: deep_sleep_disable_switch
 # The following are boolean helpers in Home Assistant
@@ -434,7 +433,7 @@ sensor:
     accuracy_decimals: 2
     device_class: battery
     unit_of_measurement: "V"
-    internal: True
+    internal: true
     filters:
       # this multiply number may need to be manually adjusted
       # I used a 3.7V LiPo battery: 5V -> 100K resistor -> ADC -> 100K resistor -> GND
@@ -529,7 +528,7 @@ sensor:
 text_sensor:
   - platform: version
     name: "${friendly_name} ESPHome Version"
-    hide_timestamp: True
+    hide_timestamp: true
     entity_category: diagnostic
   - platform: wifi_info
     ip_address:
@@ -681,7 +680,7 @@ display:
     id: eink_display
     cs_pin:
       number: ${cs_pin}
-      ignore_strapping_warning: True
+      ignore_strapping_warning: true
     dc_pin: ${dc_pin}
     busy_pin:
       number: ${busy_pin}

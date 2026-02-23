@@ -52,9 +52,6 @@ Also, keep in mind that Home Assistant reloads Google Tasks and Calendar data ev
 
 Also note that I have included a character filter so that unavailable characters do not appear on the board.  This should match the `glyphs` of the `fonts` section in your ESPHome YAML.  You can, of course, allow certain characters that are not in the glyphs list and then use sensor filters in your ESPHome YAML to make them print as something else (for example, add € to the HA filter to let it through and use a substitute filter in the ESPHome YAML to change it to an E). I personally prefer to simply drop special characters completely.
 
-Previous to 2025, Pillow (the element of ESPHome uses to encode characters into pictures) limits the number of glyphs that can be used. I believe it's 255.
-This limit may be removed now.
-
 [`HomeAssistant_template_tasks.yaml`](HomeAssistant_template_tasks.yaml)
 
 ### Waketime Sensors
@@ -225,6 +222,7 @@ You could use masking tape to hold down the cable, too. I also ended up using pi
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
+| 2026.02.22 | Minor yaml cleanup |
 | 2025.06.05 | ADC Battery monitoring finally properly fixed (I fundamentally misunderstood how ADC worked, sorry!) - also, improved!
 | 2025.05.09 | Fixed critical bug that caused the boards to stay awake, killing the battery. Resolves https://github.com/trip5/ESPHome-eInk-Boards/issues/4 - thanks [`AStoker`](https://github.com/AStoker)! |
 | 2024.12.18 | Official support for the tricolor boards now in ESPHome 2024.12.0 |
