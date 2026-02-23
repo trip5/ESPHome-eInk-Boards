@@ -8,7 +8,7 @@ substitutions:
   project_name: "Trip5.eInk-WeatherBoard"
   comment: "eInk-WeatherBoard from Trip5"
   project_version: "2026.02.22"
-  time_zone: "Asia/Seoul" # Check https://github.com/trip5/timezones.json/blob/master/timezones.md
+  time_zone: "AST4ADT,M3.2.0,M11.1.0" # Check https://github.com/trip5/timezones.json/blob/master/timezones.md
   adc_pin: GPIO34
   sleep_time: 60min # this is the default but is overridden
 
@@ -29,7 +29,7 @@ substitutions:
   dc_pin: GPIO27
   reset_pin: GPIO26
   busy_pin: GPIO25
-  busy_inverted: "true" #needed on most newer boards: check ESPHome or component notes
+  busy_inverted: "true" # needed on most newer boards: check ESPHome or component notes
 
   # Everything here is meant for an 7.5 inch tricolor display, which is (as of 2024.12.0) now directly supported by ESPHome (thanks, JonasB2497!)
   # See here for full list of directly-supported displays: https://esphome.io/components/display/waveshare_epaper.html
@@ -97,6 +97,9 @@ logger:
 
 # Enable Home Assistant API
 api:
+  # delete next 2 lines if not using HA API encryption
+  encryption:
+    key: !secret encryption_key
 
 button:
   - platform: restart
@@ -311,11 +314,13 @@ font:
   - file: 'fonts/Gotham-Rounded-Bold.ttf'
     id: font_title
     size: 52
-    glyphs: WEATHR
+    glyphs: |-
+      WEATHR
   - file: 'fonts/Gotham-Rounded-Bold.ttf'
     id: font_now_temp
     size: 104
-    glyphs: °C 1234567890-
+    glyphs: |-
+      °C 1234567890-
   - file: 'fonts/Gotham-Rounded-Bold.ttf'
     id: font_small_title
     size: 30

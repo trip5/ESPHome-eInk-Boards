@@ -218,11 +218,25 @@ You could use masking tape to hold down the cable, too. I also ended up using pi
 
 ---
 
+## *Problems?*
+
+### Board doesn't display data
+
+You probably haven't configured the device in Home Assistant yet.  If you haven't set up the scripts, then the device has no data to display.  If you changed the API encryption keys, you need to reconfigure it.
+
+Check your ESPHome integration that the device is there.  Also, you can check the Developer Tools - States that the script has created the sensor with data.
+
+### Red is faded
+
+Looks like it might help to disable sleep mode, open HA or the IP address of the board and click "Refresh Screen" - perhaps deep sleep is a culprit here?
+
+---
+
 ## Update History
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
-| 2026.02.22 | Minor yaml cleanup |
+| 2026.02.22 | Minor yaml cleanup, *Problems?* added to readme |
 | 2025.06.05 | ADC Battery monitoring finally properly fixed (I fundamentally misunderstood how ADC worked, sorry!) - also, improved!
 | 2025.05.09 | Fixed critical bug that caused the boards to stay awake, killing the battery. Resolves https://github.com/trip5/ESPHome-eInk-Boards/issues/4 - thanks [`AStoker`](https://github.com/AStoker)! |
 | 2024.12.18 | Official support for the tricolor boards now in ESPHome 2024.12.0 |

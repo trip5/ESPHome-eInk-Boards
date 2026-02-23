@@ -97,6 +97,9 @@ logger:
 
 # Enable Home Assistant API
 api:
+  # delete next 2 lines if not using HA API encryption
+  encryption:
+    key: !secret encryption_key
 
 button:
   - platform: restart
