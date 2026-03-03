@@ -129,16 +129,17 @@ Please note that you may see a missing glyph (always a black box ■) on your bo
 ## Building
 
 ### Materials List
-- Waveshare 7.5inch Three-color e-Paper Display: https://www.aliexpress.com/item/32833402189.html
-- Waveshare Universal e-Paper Driver Board (ESP32 version): https://www.aliexpress.com/item/32953365564.html
+- Waveshare 7.5inch Three-color e-Paper Display wit: https://www.waveshare.com/7.5inch-e-paper-hat-h.htm
+- Waveshare Universal e-Paper Driver Board (ESP32 version): https://www.waveshare.com/e-paper-esp32-driver-board.htm
 - IKEA RÖDALM 13x18cm (5x7 inch) Frame (3.2cm / 1.25inch depth): https://www.ikea.com/kr/en/p/roedalm-frame-walnut-effect-20550039/
-- 3x7mm PCB with 2.54mm pitch: https://www.aliexpress.com/item/32330593301.html
+- 3x7mm PCB with 2.54mm pitch: https://www.aliexpress.com/item/32888860972.html
 - SM-2P & SM-2R connectors: https://www.aliexpress.com/item/33003863385.html
 - 33K and 100K resistors
 - 16V 1000UF capacitor (optional)
 - Female sockets from an ESP8266 D1 Mini or similar
 - 1260110 Rechargeable Lithium Polymer Battery (3.7V 10000mAh): https://www.aliexpress.com/item/1005006162769300.html
 - 3.7V Battery LED Digital Voltmeter (1S 3.7V): https://www.aliexpress.com/item/32848280207.html
+  - Not available?  Alternative: https://www.aliexpress.com/item/1005007475751984.html
 - TP4056 Battery charger (USB C): https://www.aliexpress.com/item/32836046028.html
 - Masking tape
 
