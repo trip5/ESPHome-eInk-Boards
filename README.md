@@ -273,6 +273,10 @@ Madelena Mak's Weatherman Dashboard : https://github.com/Madelena/esphome-weathe
 
 Stephan Wijman's Weatherframe: https://blog.wijman.net/e-ink-weather-frame-with-esphome-and-home-assistant/
 
+Mauro de Freitas's WeatherPortal-EPD (powered by Open-Meteo, no HA dependency): https://github.com/maurokenny/esp32-WeatherPortal-EPD
+
+...which was based on Luke Marzen's project here: https://github.com/lmarzen/esp32-weather-epd
+
 How to use the "new" way to call services in dev tools: https://community.home-assistant.io/t/debugging-templates-and-service-response-variables/617997
 
 Paviro's ESPHome ePaper Calendar: https://github.com/paviro/ESPHome-ePaper-Calendar
