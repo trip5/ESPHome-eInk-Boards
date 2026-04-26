@@ -242,7 +242,7 @@ Looks like it might help to disable sleep mode, open HA or the IP address of the
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
-| 2026.04.26 | Weatherboard yaml altered to work with both Open-Meteo and Openweathermap, may work with others |
+| 2026.04.26 | Weatherboard's Home Assistant yaml altered to work with both Open-Meteo and Openweathermap, may work with others |
 | 2026.02.22 | Minor yaml cleanup, *Problems?* added to readme |
 | 2025.06.05 | ADC Battery monitoring finally properly fixed (I fundamentally misunderstood how ADC worked, sorry!) - also, improved!
 | 2025.05.09 | Fixed critical bug that caused the boards to stay awake, killing the battery. Resolves https://github.com/trip5/ESPHome-eInk-Boards/issues/4 - thanks [`AStoker`](https://github.com/AStoker)! |
