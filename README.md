@@ -22,9 +22,9 @@ Anything in `configuration.yaml` under the `template:` heading must now be moved
 
 #### WeatherBoard Sensors
 
-My Weatherboard code if heavily derived from Madelena Mak's [Weatherman Dashboard](https://github.com/Madelena/esphome-weatherman-dashboard) and even more so from Stephan Wijman's updates on his [blog](https://blog.wijman.net/e-ink-weather-frame-with-esphome-and-home-assistant/).  Big thanks to both.
+My Weatherboard code is heavily derived from Madelena Mak's [Weatherman Dashboard](https://github.com/Madelena/esphome-weatherman-dashboard) and even more so from Stephan Wijman's updates on his [blog](https://blog.wijman.net/e-ink-weather-frame-with-esphome-and-home-assistant/).  Big thanks to both.
 
-This relies on the OpenWeatherMap integration to function.  In its unedited form, requires 1 service: `openweathermap` (it seems `onecall_daily` and `onecall_hourly` are not relevant anymore). Read more about that [here](https://www.home-assistant.io/integrations/openweathermap).
+This relies on the a weather API integration to function.  `Open-Meteo` requires no registration while `OpenWeatherMap` requires an API key.
 
 The simple YAML uses 2-hour increments to the hourly forecast but this is adjustable by variables.  There are also notes in the code about how to change the datestamp if you don't prefer the formats I use.  Other than those 2 points, there should not be much editing of the code to make it functional.  Except, of course, for the waketimes.  See the notes below and in the YAML.
 
@@ -34,13 +34,18 @@ The dynamic YAML can use any times ahead of the current time (ie after midnight 
 
 [`HomeAssistant_template_weather_dynamic.yaml`](HomeAssistant_template_weather_dynamic.yaml)
 
-Please note that in both versions, titles are now editable. Be sure that the characters you use are defined in the `glyphs` of the `fonts` section.
+Please note that in both versions, titles are editable. Be sure that the characters you use are defined in the `glyphs` of the `fonts` section.
 
 ### TasksBoard Sensors
 
 This code is inspired by the above code but is dramatically different in many ways.
 
-This uses Home Assistant's inbuilt todo lists as a base.  Start with the shopping list if you must [here](https://www.home-assistant.io/integrations/shopping_list).  It can also use the official Google Tasks integration. Read more [here](https://www.home-assistant.io/integrations/google_tasks).  It can also use the official Google Calendar integration.  Read more [here](https://www.home-assistant.io/integrations/google). And of course, it can very likely use other integrations as well.  I'd encourage you if you figure out how, to post your solution somewhere so you can help other people!
+This uses Home Assistant's in-built todo lists as a base.
+Start with the shopping list if you must [here](https://www.home-assistant.io/integrations/shopping_list).
+It can also use the official Google Tasks integration. Read more [here](https://www.home-assistant.io/integrations/google_tasks).
+It can also use the official Google Calendar integration.  Read more [here](https://www.home-assistant.io/integrations/google).
+And of course, it can very likely use other integrations as well.
+I'd encourage you if you figure out how, to post your solution somewhere so you can help other people!
 
 Unlike the WeatherBoard code, you will need to carefully edit certain sections of this to match what integrations you use, and the names of the lists and calendars you wish to appear, and how.  Notes in the Jinja code look like this: `{# comment #}` and should be pretty helpful.
 
@@ -129,7 +134,7 @@ Please note that you may see a missing glyph (always a black box ■) on your bo
 ## Building
 
 ### Materials List
-- Waveshare 7.5inch Three-color e-Paper Display wit: https://www.waveshare.com/7.5inch-e-paper-hat-h.htm
+- Waveshare 7.5inch Three-color e-Paper Display with hat: https://www.waveshare.com/7.5inch-e-paper-hat-h.htm
 - Waveshare Universal e-Paper Driver Board (ESP32 version): https://www.waveshare.com/e-paper-esp32-driver-board.htm
 - IKEA RÖDALM 13x18cm (5x7 inch) Frame (3.2cm / 1.25inch depth): https://www.ikea.com/kr/en/p/roedalm-frame-walnut-effect-20550039/
 - 3x7mm PCB with 2.54mm pitch: https://www.aliexpress.com/item/32888860972.html
@@ -137,11 +142,11 @@ Please note that you may see a missing glyph (always a black box ■) on your bo
 - 33K and 100K resistors
 - 16V 1000UF capacitor (optional)
 - Female sockets from an ESP8266 D1 Mini or similar
-- 1260110 Rechargeable Lithium Polymer Battery (3.7V 10000mAh): https://www.aliexpress.com/item/1005006162769300.html
+- 1260110 Rechargeable Lithium Polymer Battery (3.7V 10000mAh): https://www.aliexpress.com/item/1005006162769300.html (any 3.7V battery will do)
 - 3.7V Battery LED Digital Voltmeter (1S 3.7V): https://www.aliexpress.com/item/32848280207.html
   - Not available?  Alternative: https://www.aliexpress.com/item/1005007475751984.html
 - TP4056 Battery charger (USB C): https://www.aliexpress.com/item/32836046028.html
-- Masking tape
+- Painter's tape / masking tape
 
 ### Waveshare E-Paper ESP32 Driver Board
 
@@ -237,6 +242,7 @@ Looks like it might help to disable sleep mode, open HA or the IP address of the
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
+| 2026.04.26 | Weatherboard yaml altered to work with both Open-Meteo and Openweathermap, may work with others |
 | 2026.02.22 | Minor yaml cleanup, *Problems?* added to readme |
 | 2025.06.05 | ADC Battery monitoring finally properly fixed (I fundamentally misunderstood how ADC worked, sorry!) - also, improved!
 | 2025.05.09 | Fixed critical bug that caused the boards to stay awake, killing the battery. Resolves https://github.com/trip5/ESPHome-eInk-Boards/issues/4 - thanks [`AStoker`](https://github.com/AStoker)! |
@@ -257,7 +263,7 @@ Looks like it might help to disable sleep mode, open HA or the IP address of the
 
 [Gotham-Rounded-Medium](https://powernukkit.github.io/DownGit/index.html#/home?directFile=1&url=https://github.com/trip5/ESPHome-eInk-Boards/blob/main/fonts/Gotham-Rounded-Bold.ttf)
 
-## Download MaterialDesign-Webfont (from Templarian's Github)
+## Download MaterialDesign-Webfont (from [Templarian](https://github.com/Templarian/)'s Github)
 
 [MaterialDesign-Webfont](https://powernukkit.github.io/DownGit/index.html#/home?directFile=1&url=https://github.com/Templarian/MaterialDesign-Webfont/blob/master/fonts/materialdesignicons-webfont.ttf)
 

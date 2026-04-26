@@ -4,6 +4,9 @@
     - platform: time_pattern
       minutes: /5
       variables:
+        # USE ONE Weather entity_id (check Developer Tools > States)
+        # Open-Meteo likely uses "weather.home" and Openweather likely uses "weather.openweathermap" but yours may be different
+        weather_entity: "weather.home"
         # Here you can edit the increments
         increment_0: "2"
         increment_1: "4"
@@ -29,13 +32,13 @@
       data:
         type: hourly
       target:
-        entity_id: weather.openweathermap
+        entity_id: "{{ weather_entity }}"
       response_variable: hourly
     - service: weather.get_forecasts
       data:
         type: daily
       target:
-        entity_id: weather.openweathermap
+        entity_id: "{{ weather_entity }}"
       response_variable: daily
   sensor:
     - name: eInk WeatherBoard Data
@@ -44,9 +47,9 @@
       attributes:
         hourly_times: "{{hourlytimes}}"
         weather_now_temperature: >
-          {{ hourly["weather.openweathermap"].forecast[0].temperature | round }}
+          {{ hourly[weather_entity].forecast[0].temperature | round }}
         weather_now_condition: >
-          {%- set cond_now = hourly["weather.openweathermap"].forecast[0].condition %}
+          {%- set cond_now = hourly[weather_entity].forecast[0].condition %}
           {%- if states('sun.sun') == 'below_horizon' %}
             {%- if cond_now == 'sunny' %} night {% elif cond_now == 'partlycloudy' %} night-partly-cloudy {% else %} {{ cond_now }} {% endif %}
           {%- else %}
@@ -54,52 +57,52 @@
           {%- endif %}
         weather_hourly_title: "{{ titles[1] }}"
         weather_hourly_condition_0: >
-          {%- set cond0 = hourly["weather.openweathermap"].forecast[increment_0].condition %}
+          {%- set cond0 = hourly[weather_entity].forecast[increment_0].condition %}
           {%- set next_setting = as_timestamp(state_attr('sun.sun', 'next_setting')) %}
           {%- set next_rising = as_timestamp(state_attr('sun.sun', 'next_rising')) %}
-          {%- set cond0_time = as_timestamp(hourly["weather.openweathermap"].forecast[increment_0].datetime) %}
+          {%- set cond0_time = as_timestamp(hourly[weather_entity].forecast[increment_0].datetime) %}
           {%- if cond0_time > next_setting and cond0_time < next_rising %}
             {%- if cond0 == 'sunny' %} night {% elif cond0 == 'partlycloudy' %} night-partly-cloudy {% else %} {{ cond0 }} {% endif %}
           {%- else %}
             {{ cond0 }}
           {%- endif %}
         weather_hourly_temperature_0: >
-          {{ hourly["weather.openweathermap"].forecast[increment_0].temperature | round }}
+          {{ hourly[weather_entity].forecast[increment_0].temperature | round }}
         weather_hourly_timestamp_0: >
-          {%- set timestamp = as_timestamp(hourly["weather.openweathermap"].forecast[increment_0].datetime) | timestamp_custom(time_format) %} {{ timestamp.lstrip(strip_zero) }}
+          {%- set timestamp = as_timestamp(hourly[weather_entity].forecast[increment_0].datetime) | timestamp_custom(time_format) %} {{ timestamp.lstrip(strip_zero) }}
         weather_hourly_condition_1: >
-          {%- set cond0 = hourly["weather.openweathermap"].forecast[increment_1].condition %}
+          {%- set cond0 = hourly[weather_entity].forecast[increment_1].condition %}
           {%- set next_setting = as_timestamp(state_attr('sun.sun', 'next_setting')) %}
           {%- set next_rising = as_timestamp(state_attr('sun.sun', 'next_rising')) %}
-          {%- set cond0_time = as_timestamp(hourly["weather.openweathermap"].forecast[increment_1].datetime) %}
+          {%- set cond0_time = as_timestamp(hourly[weather_entity].forecast[increment_1].datetime) %}
           {%- if cond0_time > next_setting and cond0_time < next_rising %}
             {%- if cond0 == 'sunny' %} night {% elif cond0 == 'partlycloudy' %} night-partly-cloudy {% else %} {{ cond0 }} {% endif %}
           {%- else %}
             {{ cond0 }}
           {%- endif %}
         weather_hourly_temperature_1: >
-          {{ hourly["weather.openweathermap"].forecast[increment_1].temperature | round }}
+          {{ hourly[weather_entity].forecast[increment_1].temperature | round }}
         weather_hourly_timestamp_1: >
-          {%- set timestamp = as_timestamp(hourly["weather.openweathermap"].forecast[increment_1].datetime) | timestamp_custom(time_format) %} {{ timestamp.lstrip(strip_zero) }}
+          {%- set timestamp = as_timestamp(hourly[weather_entity].forecast[increment_1].datetime) | timestamp_custom(time_format) %} {{ timestamp.lstrip(strip_zero) }}
         weather_hourly_condition_2: >
-          {%- set cond0 = hourly["weather.openweathermap"].forecast[increment_2].condition %}
+          {%- set cond0 = hourly[weather_entity].forecast[increment_2].condition %}
           {%- set next_setting = as_timestamp(state_attr('sun.sun', 'next_setting')) %}
           {%- set next_rising = as_timestamp(state_attr('sun.sun', 'next_rising')) %}
-          {%- set cond0_time = as_timestamp(hourly["weather.openweathermap"].forecast[increment_2].datetime) %}
+          {%- set cond0_time = as_timestamp(hourly[weather_entity].forecast[increment_2].datetime) %}
           {%- if cond0_time > next_setting and cond0_time < next_rising %}
             {%- if cond0 == 'sunny' %} night {% elif cond0 == 'partlycloudy' %} night-partly-cloudy {% else %} {{ cond0 }} {% endif %}
           {%- else %}
             {{ cond0 }}
           {%- endif %}
         weather_hourly_temperature_2: >
-          {{ hourly["weather.openweathermap"].forecast[increment_2].temperature | round }}
+          {{ hourly[weather_entity].forecast[increment_2].temperature | round }}
         weather_hourly_timestamp_2: >
-          {%- set timestamp = as_timestamp(hourly["weather.openweathermap"].forecast[increment_2].datetime) | timestamp_custom(time_format) %} {{ timestamp.lstrip(strip_zero) }}
+          {%- set timestamp = as_timestamp(hourly[weather_entity].forecast[increment_2].datetime) | timestamp_custom(time_format) %} {{ timestamp.lstrip(strip_zero) }}
         weather_hourly_condition_3: >
-          {%- set cond0 = hourly["weather.openweathermap"].forecast[increment_3].condition %}
+          {%- set cond0 = hourly[weather_entity].forecast[increment_3].condition %}
           {%- set next_setting = as_timestamp(state_attr('sun.sun', 'next_setting')) %}
           {%- set next_rising = as_timestamp(state_attr('sun.sun', 'next_rising')) %}
-          {%- set cond0_time = as_timestamp(hourly["weather.openweathermap"].forecast[increment_3].datetime) %}
+          {%- set cond0_time = as_timestamp(hourly[weather_entity].forecast[increment_3].datetime) %}
           {%- if cond0_time > next_setting and cond0_time < next_rising %}
             {%- if cond0 == 'sunny' %} night {% elif cond0 == 'partlycloudy' %} night-partly-cloudy {% else %} {{ cond0 }} {% endif %}
           {%- else %}
@@ -107,29 +110,29 @@
           {%- endif %}
         weather_daily_title: "{{ titles[2] }}"
         weather_daily_condition_0: >
-          {{ daily["weather.openweathermap"].forecast[daily_0].condition }}
+          {{ daily[weather_entity].forecast[daily_0].condition }}
         weather_daily_temperature_0: >
-          {{ daily["weather.openweathermap"].forecast[daily_0].temperature | round }}
+          {{ daily[weather_entity].forecast[daily_0].temperature | round }}
         weather_daily_timestamp_0: >
-          {{ as_timestamp(daily["weather.openweathermap"].forecast[daily_0].datetime) | timestamp_custom('%a') }}
+          {{ as_timestamp(daily[weather_entity].forecast[daily_0].datetime) | timestamp_custom('%a') }}
         weather_daily_condition_1: >
-          {{ daily["weather.openweathermap"].forecast[daily_1].condition }}
+          {{ daily[weather_entity].forecast[daily_1].condition }}
         weather_daily_temperature_1: >
-          {{ daily["weather.openweathermap"].forecast[daily_1].temperature | round }}
+          {{ daily[weather_entity].forecast[daily_1].temperature | round }}
         weather_daily_timestamp_1: >
-          {{ as_timestamp(daily["weather.openweathermap"].forecast[daily_1].datetime) | timestamp_custom('%a') }}
+          {{ as_timestamp(daily[weather_entity].forecast[daily_1].datetime) | timestamp_custom('%a') }}
         weather_daily_condition_2: >
-          {{ daily["weather.openweathermap"].forecast[daily_2].condition }}
+          {{ daily[weather_entity].forecast[daily_2].condition }}
         weather_daily_temperature_2: >
-          {{ daily["weather.openweathermap"].forecast[daily_2].temperature | round }}
+          {{ daily[weather_entity].forecast[daily_2].temperature | round }}
         weather_daily_timestamp_2: >
-          {{ as_timestamp(daily["weather.openweathermap"].forecast[daily_2].datetime) | timestamp_custom('%a') }}
+          {{ as_timestamp(daily[weather_entity].forecast[daily_2].datetime) | timestamp_custom('%a') }}
         weather_daily_condition_3: >
-          {{ daily["weather.openweathermap"].forecast[daily_3].condition }}
+          {{ daily[weather_entity].forecast[daily_3].condition }}
         weather_daily_temperature_3: >
-          {{ daily["weather.openweathermap"].forecast[daily_3].temperature | round }}
+          {{ daily[weather_entity].forecast[daily_3].temperature | round }}
         weather_daily_timestamp_3: >
-          {{ as_timestamp(daily["weather.openweathermap"].forecast[daily_3].datetime) | timestamp_custom('%a') }}
+          {{ as_timestamp(daily[weather_entity].forecast[daily_3].datetime) | timestamp_custom('%a') }}
 
 - trigger:
     - platform: time_pattern
